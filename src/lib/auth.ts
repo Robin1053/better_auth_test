@@ -7,7 +7,7 @@ import { admin, lastLoginMethod } from "better-auth/plugins";
 export const auth = betterAuth({
   database: new Database(process.env.DB_PATH || "dev.db"),
   baseURL: process.env.BETTER_AUTH_BASE_URL || "http://localhost:3000",
-  secret: process.env.BETTER_AUTH_SECRET || "default_secret_key",
+  secret: process.env.BETTER_AUTH_SECRET,
 
   emailAndPassword: {
     enabled: true,
