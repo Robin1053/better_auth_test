@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, useTheme, CircularProgress, SvgIcon } from "@mui/material";
+import { Button, useTheme, CircularProgress, SvgIcon, Icon } from "@mui/material";
 import { JSX, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
@@ -68,9 +68,9 @@ const GoogleIcon = (
 );
 
 const PasskeyIcon = (
-  <span className="material-symbols-outlined">
+  <Icon className="material-symbols-outlined" sx={{ fontSize: 22 }}>
     passkey
-  </span>
+  </Icon>
 );
 
 const GitHubIcon = (
