@@ -1,11 +1,10 @@
-import Signin from '@/Components/auth/signin'
-import Typography from '@mui/material/Typography'
+import { AuthPageComponent } from "@/Components/auth/authpage";
+
 export default async function AuthPage() {
-    return (
-        <>
-            <Typography variant="h3" >Auth Page</Typography>
-            <Signin>
-            </Signin>
-        </>
-    )
+
+  return (
+    <>
+    <AuthPageComponent />
+    </>
+  )
 }

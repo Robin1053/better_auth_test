@@ -2,7 +2,7 @@
 
 import { authClient } from "@/lib/auth-client";
 import { VisibilityOff, Visibility } from "@mui/icons-material";
-import { Box, Card, CardContent, CardHeader, Input, FormControl, IconButton, InputAdornment, InputLabel, TextField, Typography } from "@mui/material";
+import { Box, Card, CardContent, CardHeader, Input, FormControl, IconButton, InputAdornment, InputLabel, TextField, Typography, Alert, Button } from "@mui/material";
 import * as React from "react";
 import * as zod from "zod";
 
@@ -46,14 +46,35 @@ function Signin() {
     };
     const [showPassword, setShowPassword] = React.useState(false);
 
+
+    function handleEmailSignIn(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        setLoading(true);
+        setErrorMessage("");
+        setEmailError(false);
+        setPasswordError(false);
+
+    }
+
     return (
         <>
-            <Card>
+            <Card sx={{ maxWidth: 400, margin: "0 auto", mt: 5 }}>
                 <CardHeader>
                     <Typography variant="h4" >Sign In</Typography>
                 </CardHeader>
                 <CardContent>
-                    <Box>
+                    <Typography variant="h3" color="primary">Sign In </Typography>
+                    {errorMessage && (
+                        <Alert variant="outlined" color="error">
+                            {errorMessage}
+                        </Alert>
+                    )}
+                    <Box
+                        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                        component="form"
+                        onSubmit={handleEmailSignIn}
+                        noValidate>
+
                         <Box>
                             <TextField
                                 fullWidth
@@ -92,6 +113,10 @@ function Signin() {
                                     }
                                 />
                             </FormControl>
+
+                            <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
+                                Sign In
+                            </Button>
                         </Box>
                     </Box>
                 </CardContent>
