@@ -2,12 +2,15 @@
 
 import { authClient } from "@/lib/auth-client";
 import { VisibilityOff, Visibility } from "@mui/icons-material";
-import { Box, Card, CardContent, CardHeader, Input, FormControl, IconButton, InputAdornment, InputLabel, TextField, Typography, Alert, Button, LinearProgress, Divider, Link } from "@mui/material";
+import { Box, Card, CardContent, CardHeader, Input, FormControl, IconButton, InputAdornment, InputLabel, TextField, Typography, Alert, Button, LinearProgress, Divider, FormControlLabel, Checkbox } from "@mui/material";
 import * as React from "react";
-import * as zod from "zod";
 import { GitHubButton, GoogleButton, PasskeyButton } from "./LoginButtons";
 
-function Signin() {
+type SigninProps = {
+    onForgotPassword?: () => void;
+};
+
+function Signin({ onForgotPassword }: SigninProps) {
     // States 
     const [email, setEmail] = React.useState("")
     const [password, setPassword] = React.useState("")
@@ -110,8 +113,8 @@ function Signin() {
 
                     default:
                         setErrorMessage("Unknown error: " + error.message);
-                        setEmailError
-                        setPasswordError
+                        setEmailError(true);
+                        setPasswordError(true);
                 }
 
                 console.error("Better Auth Eror:", error);
@@ -131,7 +134,7 @@ function Signin() {
                 <CardHeader>
                     <Typography variant="h4" >Sign In</Typography>
                 </CardHeader>
-                <CardContent>
+                <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                     <Typography variant="h3" color="primary">Sign In </Typography>
                     {errorMessage && (
                         <Alert variant="outlined" color="error">
@@ -156,7 +159,21 @@ function Signin() {
                             required
                             error={EmailError}
                         />
-                        <Link><Typography variant="caption" color="secondary">Forgot Passwort?</Typography></Link>
+                        <Button
+                            onClick={onForgotPassword}
+                            sx={
+                                {
+                                    width: 50,
+                                    justifyContent: "flex-end",
+                                    textTransform: "none",
+                                    padding: 0,
+                                    minWidth: "unset"
+                                }
+                            }>
+                            <Typography variant="caption" color="secondary" >Forgot Passwort?</Typography>
+                        </Button>
+
+
                         <FormControl fullWidth variant="standard">
                             <InputLabel htmlFor="password">Passwort</InputLabel>
                             <Input
@@ -184,6 +201,9 @@ function Signin() {
                                 }
                             />
                         </FormControl>
+                        <FormControlLabel control={
+                            <Checkbox value={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
+                        } label="Remember Me?" />
 
                         <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
                             Sign In with Email and Passwort
@@ -202,13 +222,13 @@ function Signin() {
                             )
                         }
                     </Box>
-                    <Box>
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                         <PasskeyButton width={400} />
                         <GoogleButton width={400} />
                         <GitHubButton width={400} />
                     </Box>
                 </CardContent>
-            </Card>
+            </Card >
         </>
     );
 }
