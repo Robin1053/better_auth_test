@@ -6,7 +6,6 @@ import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { useRouter, useSearchParams } from 'next/navigation';
 import Signin from './signin';
 import Signup from './signup';
-import { verificationSchema } from 'better-auth';
 
 function AuthPageComponent() {
     const router = useRouter();

@@ -1,11 +1,11 @@
 "use client"
 
 import { authClient } from "@/lib/auth-client";
-import { VisibilityOff, Visibility } from "@mui/icons-material";
-import { Box, Card, CardContent, CardHeader, Input, FormControl, IconButton, InputAdornment, InputLabel, TextField, Typography, Alert, Button, LinearProgress, Divider, FormControlLabel, Checkbox } from "@mui/material";
+import { Box, Card, CardContent, Typography, Alert, Button, LinearProgress, Divider, FormControlLabel, Checkbox } from "@mui/material";
 import * as React from "react";
 import { GitHubButton, GoogleButton, PasskeyButton } from "./LoginButtons";
-
+import Passwordfield from "@/Components/auth/FormComponents/Password";
+import Emailfield from "@/Components/auth/FormComponents/email";
 type SigninProps = {
     onForgotPassword?: () => void;
 };
@@ -28,28 +28,6 @@ function Signin({ onForgotPassword }: SigninProps) {
     const wasEmail = authClient.isLastUsedLoginMethod("email")
     const wasPasskey = authClient.isLastUsedLoginMethod("passkey")
     const wasGitHub = authClient.isLastUsedLoginMethod("github")
-
-
-
-
-
-    // ------------------------
-    // Password visibility handlers
-    // ------------------------
-    //  
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
-    const handleMouseDownPassword = (
-        event: React.MouseEvent<HTMLButtonElement>
-    ) => {
-        event.preventDefault();
-    };
-    const handleMouseUpPassword = (
-        event: React.MouseEvent<HTMLButtonElement>
-    ) => {
-        event.preventDefault();
-    };
-    const [showPassword, setShowPassword] = React.useState(false);
-
 
 
 
@@ -130,10 +108,7 @@ function Signin({ onForgotPassword }: SigninProps) {
 
     return (
         <>
-            <Card sx={{ maxWidth: 400, margin: "0 auto", mt: 5 }}>
-                <CardHeader>
-                    <Typography variant="h4" >Sign In</Typography>
-                </CardHeader>
+            <Card sx={{ maxWidth: 450, margin: "0 auto", mt: 5 }}>
                 <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                     <Typography variant="h3" color="primary">Sign In </Typography>
                     {errorMessage && (
@@ -148,16 +123,11 @@ function Signin({ onForgotPassword }: SigninProps) {
                         noValidate>
 
 
-                        <TextField
-                            fullWidth
-                            id="email"
-                            label="Max@Musterman.com"
-                            variant="standard"
-                            name="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            error={EmailError}
+                        <Emailfield
+                            email={email}
+                            setEmail={setEmail}
+                            EmailError={EmailError}
+                            maxWidth={400}
                         />
                         <Button
                             onClick={onForgotPassword}
@@ -174,33 +144,13 @@ function Signin({ onForgotPassword }: SigninProps) {
                         </Button>
 
 
-                        <FormControl fullWidth variant="standard">
-                            <InputLabel htmlFor="password">Passwort</InputLabel>
-                            <Input
-                                value={password}
-                                required
-                                id="password"
-                                type={showPassword ? "text" : "password"}
-                                onChange={(e) => setPassword(e.target.value)}
-                                error={PasswordError}
-                                endAdornment={
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label={
-                                                showPassword
-                                                    ? "Passwort ausblenden"
-                                                    : "Passwort anzeigen"
-                                            }
-                                            onClick={handleClickShowPassword}
-                                            onMouseDown={handleMouseDownPassword}
-                                            onMouseUp={handleMouseUpPassword}
-                                        >
-                                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                }
-                            />
-                        </FormControl>
+                        <Passwordfield
+                            password={password}
+                            setPassword={setPassword}
+                            PasswordError={PasswordError}
+                            maxWidth={400}
+                            Label="Password"
+                        />
                         <FormControlLabel control={
                             <Checkbox value={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
                         } label="Remember Me?" />

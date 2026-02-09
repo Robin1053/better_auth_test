@@ -1,5 +1,6 @@
 "use client";
 
+import { NotificationProvider } from "@/Components/ui/NotificationProvider";
 import "./globals.css";
 import { theme } from "@/theme/mui";
 import { Box, ThemeProvider } from "@mui/material";
@@ -35,7 +36,9 @@ export default function RootLayout({
             }
           }>
           <ThemeProvider theme={theme}>
-            {children}
+            <NotificationProvider>
+              {children}
+            </NotificationProvider>
           </ThemeProvider>
         </Box>
       </body>
