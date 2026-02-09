@@ -6,6 +6,8 @@ import { TabContext, TabList, TabPanel } from '@mui/lab'
 import { useRouter, useSearchParams } from 'next/navigation';
 import Signin from './signin';
 import Signup from './signup';
+import { useEffect } from 'react';
+import { authClient } from '@/lib/auth-client';
 
 function AuthPageComponent() {
     const router = useRouter();
@@ -50,6 +52,15 @@ function AuthPageComponent() {
         }
     };
 
+    
+    useEffect(() => {
+        if (!PublicKeyCredential.isConditionalMediationAvailable ||
+            !PublicKeyCredential.isConditionalMediationAvailable()) {
+            return;
+        }
+
+        void authClient.signIn.passkey({ autoFill: true })
+    }, [])
     return (
         <>
             <Box sx={{ width: '100%', typography: 'body1' }}>
@@ -72,4 +83,4 @@ function AuthPageComponent() {
     )
 }
 
-export { AuthPageComponent}
+export { AuthPageComponent }

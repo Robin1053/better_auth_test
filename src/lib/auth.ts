@@ -2,15 +2,20 @@ import { betterAuth } from "better-auth";
 import Database from "better-sqlite3";
 import { nextCookies } from "better-auth/next-js";
 import { passkey } from "@better-auth/passkey";
-import { admin, lastLoginMethod } from "better-auth/plugins";
+import { admin, lastLoginMethod, twoFactor } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: new Database(process.env.DB_PATH || "dev.db"),
   baseURL: process.env.BETTER_AUTH_BASE_URL || "http://localhost:3000",
   secret: process.env.BETTER_AUTH_SECRET,
 
+
+  rateLimit: {
+    enabled: true,
+  },
   emailAndPassword: {
     enabled: true,
+    autoSignIn: true,
   },
   socialProviders: {
     google: {
@@ -22,5 +27,11 @@ export const auth = betterAuth({
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
     },
   },
-  plugins: [nextCookies(), passkey(), admin(), lastLoginMethod()],
+  plugins: [
+    nextCookies(),
+    passkey(),
+    admin(),
+    lastLoginMethod(),
+    twoFactor()
+  ],
 });
