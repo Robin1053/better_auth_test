@@ -10,7 +10,7 @@ type PasswordfieldProps = {
     Label: string;
 };
 
-function Passwordfield({
+export function Passwordfield({
     password,
     setPassword,
     PasswordError,
@@ -42,5 +42,3 @@ function Passwordfield({
         </FormControl>
     );
 }
-
-export default Passwordfield;

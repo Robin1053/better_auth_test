@@ -8,7 +8,7 @@ type EmailfieldProps = {
     EmailError: boolean;
     maxWidth?: number;
 };
-function Emailfield({
+export function Emailfield({
     email,
     setEmail,
     EmailError,
@@ -35,5 +35,3 @@ function Emailfield({
         </>
     )
 }
-
-export default Emailfield

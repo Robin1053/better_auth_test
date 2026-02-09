@@ -1,16 +1,32 @@
 "use client"
 
 import { authClient } from "@/lib/auth-client";
-import { Box, Card, CardContent, Typography, Alert, Button, LinearProgress, Divider, FormControlLabel, Checkbox } from "@mui/material";
+import { Box, Card, CardContent, Typography, Alert, Button, LinearProgress, Divider, FormControlLabel, Checkbox, Badge } from "@mui/material";
 import * as React from "react";
-import { GitHubButton, GoogleButton, PasskeyButton } from "./LoginButtons";
-import Passwordfield from "@/Components/auth/FormComponents/Password";
-import Emailfield from "@/Components/auth/FormComponents/email";
+import { GitHubButton, GoogleButton, PasskeyButton } from "@/Components/auth/FormComponents/LoginButtons";
+import { Passwordfield } from "@/Components/auth/FormComponents/Password";
+import { Emailfield } from "@/Components/auth/FormComponents/email";
+import { useNotification } from "@/Components/ui/NotificationProvider";
+import { useRouter } from "next/navigation";
+
+
 type SigninProps = {
     onForgotPassword?: () => void;
 };
+const { data: session } = await authClient.getSession()
 
 function Signin({ onForgotPassword }: SigninProps) {
+    const router = useRouter();
+
+
+    //session check
+    if (session) {
+        router.replace("/")
+    }
+
+    //Notification
+    const { notify } = useNotification();
+
     // States 
     const [email, setEmail] = React.useState("")
     const [password, setPassword] = React.useState("")
@@ -98,6 +114,8 @@ function Signin({ onForgotPassword }: SigninProps) {
                 console.error("Better Auth Eror:", error);
                 return;
             }
+            notify({ message: "Signin successful!", type: "success" });
+
         } catch (err) {
             console.error("Unexpected error:", err);
             setErrorMessage("An unexpected error has occurred.: " + String(err));
@@ -112,7 +130,9 @@ function Signin({ onForgotPassword }: SigninProps) {
                 <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                     <Typography variant="h3" color="primary">Sign In </Typography>
                     {errorMessage && (
-                        <Alert variant="outlined" color="error">
+                        <Alert
+                            variant="outlined"
+                            severity="error">
                             {errorMessage}
                         </Alert>
                     )}
@@ -122,26 +142,22 @@ function Signin({ onForgotPassword }: SigninProps) {
                         onSubmit={handleEmailSignIn}
                         noValidate>
 
-
                         <Emailfield
                             email={email}
                             setEmail={setEmail}
                             EmailError={EmailError}
                             maxWidth={400}
                         />
-                        <Button
-                            onClick={onForgotPassword}
-                            sx={
-                                {
-                                    width: 50,
-                                    justifyContent: "flex-end",
-                                    textTransform: "none",
-                                    padding: 0,
-                                    minWidth: "unset"
-                                }
-                            }>
-                            <Typography variant="caption" color="secondary" >Forgot Passwort?</Typography>
-                        </Button>
+
+                        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+                            <Button
+                                variant="text"
+                                onClick={onForgotPassword}
+                                sx={{ textTransform: "none" }}
+                            >
+                                Forgot Password?
+                            </Button>
+                        </Box>
 
 
                         <Passwordfield
@@ -154,12 +170,41 @@ function Signin({ onForgotPassword }: SigninProps) {
                         <FormControlLabel control={
                             <Checkbox value={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
                         } label="Remember Me?" />
-
-                        <Button type="submit" variant="contained" color="primary" fullWidth disabled={loading}>
-                            Sign In with Email and Passwort
-                        </Button>
+                        <Box sx={{ position: "relative", width: "100%" }}>
+                            <Button
+                                type="submit"
+                                variant="contained"
+                                color="primary"
+                                fullWidth
+                                disabled={loading}
+                            >
+                                Sign In with Email and Passwort
+                            </Button>
+                            {wasEmail && (
+                                <Typography
+                                    variant="caption"
+                                    color="primary"
+                                    sx={{
+                                        position: "absolute",
+                                        top: -12,
+                                        right: 0,
+                                        backgroundColor: "white",
+                                        px: 0.5,
+                                        borderRadius: 1,
+                                        fontWeight: 500,
+                                    }}
+                                >
+                                    Last logged in
+                                </Typography>
+                            )}
+                        </Box>
                     </Box>
-                    <Box>
+                    <Box sx={
+                        {
+                            maxWidth: 400,
+                            position: "relative"
+                        }
+                    }>
                         {
                             loading && (
                                 <LinearProgress />
@@ -173,10 +218,32 @@ function Signin({ onForgotPassword }: SigninProps) {
                         }
                     </Box>
                     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        <PasskeyButton width={400} />
-                        <GoogleButton width={400} />
-                        <GitHubButton width={400} />
+                        {[{ button: PasskeyButton, used: wasPasskey },
+                        { button: GoogleButton, used: wasGoogle },
+                        { button: GitHubButton, used: wasGitHub }].map((item, index) => (
+                            <Box key={index} sx={{ position: "relative", width: 400 }}>
+                                <item.button width={400} />
+                                {item.used && (
+                                    <Typography
+                                        variant="caption"
+                                        color="primary"
+                                        sx={{
+                                            position: "absolute",
+                                            top: -12,
+                                            right: 0,
+                                            backgroundColor: "white",
+                                            px: 0.5,
+                                            borderRadius: 1,
+                                            fontWeight: 500,
+                                        }}
+                                    >
+                                        Last logged in
+                                    </Typography>
+                                )}
+                            </Box>
+                        ))}
                     </Box>
+
                 </CardContent>
             </Card >
         </>

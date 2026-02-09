@@ -1,16 +1,29 @@
 "use client"
 import { Card, CardContent, Typography, Box, Button, LinearProgress, Divider, Alert } from "@mui/material";
 import * as React from "react"
-import { GitHubButton, GoogleButton } from "./LoginButtons";
-import Passwordfield from "@/Components/auth/FormComponents/Password";
-import Emailfield from "@/Components/auth/FormComponents/email";
+import { GitHubButton, GoogleButton } from "@/Components/auth/FormComponents/LoginButtons";
+import { Passwordfield } from "@/Components/auth/FormComponents/Password";
+import { Emailfield } from "@/Components/auth/FormComponents/email";
 import { authClient } from "@/lib/auth-client";
 import { useNotification } from "@/Components/ui/NotificationProvider";
-import Namefield from "./FormComponents/name";
+import { Namefield } from "@/Components/auth/FormComponents/name";
+import { useRouter } from "next/navigation";
 
+
+
+
+
+const { data: session } = await authClient.getSession()
 
 function Signup() {
+    //Router 
+    const router = useRouter();
 
+
+    //Session check
+    if (session) {
+        router.replace("/")
+    }
     //Notification
     const { notify } = useNotification();
 
@@ -152,11 +165,13 @@ function Signup() {
             }>
                 <CardContent>
                     <Typography variant="h3" color="primary">Sign Up </Typography>
-                    {
-                        errorMessage && (
-                            <Alert variant="outlined" color="error">{errorMessage}</Alert>
-                        )
-                    }
+                    {errorMessage && (
+                        <Alert
+                            variant="outlined"
+                            severity="error">
+                            {errorMessage}
+                        </Alert>
+                    )}
                     <Box
                         component="form"
                         onSubmit={handleEmailSignUp}

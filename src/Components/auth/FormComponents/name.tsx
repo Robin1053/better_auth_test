@@ -8,7 +8,7 @@ type NamefieldProps = {
     NameError: boolean;
     maxWidth?: number;
 };
-function Namefield({
+export function Namefield({
     Name,
     setName,
     NameError,
@@ -35,5 +35,3 @@ function Namefield({
         </>
     )
 }
-
-export default Namefield

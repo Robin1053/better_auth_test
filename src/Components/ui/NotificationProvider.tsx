@@ -40,7 +40,7 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
         open={open}
         autoHideDuration={4000}
         onClose={() => setOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
       >
         <Alert
           onClose={() => setOpen(false)}
