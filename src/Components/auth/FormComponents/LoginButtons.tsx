@@ -1,5 +1,5 @@
 "use client";
-
+//TODO: build a loading state or use the loading state from parent compunment 
 import { Button, useTheme, CircularProgress, SvgIcon, Icon } from "@mui/material";
 import { JSX, useState } from "react";
 import { authClient } from "@/lib/auth-client";
