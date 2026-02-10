@@ -8,6 +8,7 @@ type PasswordfieldProps = {
     PasswordError: boolean;
     maxWidth?: number;
     Label: string;
+    tabIndex?: number;
 };
 
 export function Passwordfield({
@@ -16,6 +17,7 @@ export function Passwordfield({
     PasswordError,
     maxWidth,
     Label,
+    tabIndex
 }: PasswordfieldProps) {
     const [showPassword, setShowPassword] = React.useState(false);
 
@@ -23,7 +25,7 @@ export function Passwordfield({
         setShowPassword((show) => !show);
 
     return (
-        <FormControl fullWidth variant="standard" required>
+        <FormControl fullWidth variant="standard" required tabIndex={tabIndex}>
             <InputLabel>{Label}</InputLabel>
             <Input
                 sx={{ maxWidth }}
@@ -33,7 +35,7 @@ export function Passwordfield({
                 error={PasswordError}
                 endAdornment={
                     <InputAdornment position="end">
-                        <IconButton onClick={handleClickShowPassword}>
+                        <IconButton onClick={handleClickShowPassword} tabIndex={tabIndex}>
                             {showPassword ? <VisibilityOff /> : <Visibility />}
                         </IconButton>
                     </InputAdornment>

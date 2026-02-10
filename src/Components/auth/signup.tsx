@@ -163,7 +163,7 @@ function Signup() {
                     mt: 5
                 }
             }>
-                <CardContent>
+                <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                     <Typography variant="h3" color="primary">Sign Up </Typography>
                     {errorMessage && (
                         <Alert
@@ -176,6 +176,7 @@ function Signup() {
                         component="form"
                         onSubmit={handleEmailSignUp}
                         noValidate
+                        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
                     >
                         <Namefield
                             Name={name}
@@ -203,6 +204,7 @@ function Signup() {
                             maxWidth={400}
                             Label="Repeat Passwort"
                         />
+                        {/* TODO: Add terms and conditions checkbox, and an Image input */}
                         <Button type="submit" variant="contained" fullWidth color="primary">
                             Sign Up
                         </Button>

@@ -5,6 +5,7 @@ import "./globals.css";
 import { theme } from "@/theme/mui";
 import { Box, ThemeProvider } from "@mui/material";
 import { Roboto } from 'next/font/google';
+import { AppBar } from "@/Components/ui/AppBar/Appbar";
 
 const RobotoFont = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -37,6 +38,7 @@ export default function RootLayout({
           }>
           <ThemeProvider theme={theme}>
             <NotificationProvider>
+              <AppBar />
               {children}
             </NotificationProvider>
           </ThemeProvider>

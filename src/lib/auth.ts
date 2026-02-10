@@ -2,14 +2,14 @@ import { betterAuth } from "better-auth";
 import Database from "better-sqlite3";
 import { nextCookies } from "better-auth/next-js";
 import { passkey } from "@better-auth/passkey";
-import { admin, lastLoginMethod, twoFactor } from "better-auth/plugins";
+import { admin, lastLoginMethod, oneTap, twoFactor } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: new Database(process.env.DB_PATH || "dev.db"),
   baseURL: process.env.BETTER_AUTH_BASE_URL || "http://localhost:3000",
   secret: process.env.BETTER_AUTH_SECRET,
 
-
+  appName: "Better Auth Demo",
   rateLimit: {
     enabled: true,
   },
@@ -28,10 +28,21 @@ export const auth = betterAuth({
     },
   },
   plugins: [
+    oneTap({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+    }),
     nextCookies(),
-    passkey(),
-    admin(),
+    passkey({
+      rpName: "Better Auth Demo",
+      origin: process.env.BETTER_AUTH_BASE_URL || "http://localhost:3000",
+    }),
+    admin({ defaultRole: "user", allowImpersonatingAdmins: true }),
     lastLoginMethod(),
-    twoFactor()
+    twoFactor({
+      backupCodeOptions: {
+        length: 6,
+        amount: 10,
+      },
+    })
   ],
 });

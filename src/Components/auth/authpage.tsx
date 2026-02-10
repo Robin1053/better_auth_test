@@ -8,6 +8,7 @@ import Signin from './signin';
 import Signup from './signup';
 import { useEffect } from 'react';
 import { authClient } from '@/lib/auth-client';
+import { TwoFaktor } from './twoFaktor';
 
 function AuthPageComponent() {
     const router = useRouter();
@@ -73,7 +74,7 @@ function AuthPageComponent() {
                     </Box>
                     <TabPanel value="1"><Signin onForgotPassword={() => setView("forgot")} /></TabPanel>
                     <TabPanel value="2"><Signup /></TabPanel>
-                    <TabPanel value="3">2-FA</TabPanel>
+                    <TabPanel value="3"><TwoFaktor /></TabPanel>
                     <TabPanel value="4">Forgot Passwort</TabPanel>
                     <TabPanel value="5">Passwort Verfication</TabPanel>
 

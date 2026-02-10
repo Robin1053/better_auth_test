@@ -114,6 +114,7 @@ function Signin({ onForgotPassword }: SigninProps) {
                 console.error("Better Auth Eror:", error);
                 return;
             }
+            //TODO: Handle successful login, e.g. redirect to dashboard or show success message or redirect to OTP page if 2FA is enabled.
             notify({ message: "Signin successful!", type: "success" });
 
         } catch (err) {
@@ -147,10 +148,12 @@ function Signin({ onForgotPassword }: SigninProps) {
                             setEmail={setEmail}
                             EmailError={EmailError}
                             maxWidth={400}
+                            tabIndex={1}
                         />
 
                         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
                             <Button
+                                tabIndex={-1}
                                 variant="text"
                                 onClick={onForgotPassword}
                                 sx={{ textTransform: "none" }}
@@ -166,9 +169,10 @@ function Signin({ onForgotPassword }: SigninProps) {
                             PasswordError={PasswordError}
                             maxWidth={400}
                             Label="Password"
+                            tabIndex={2}
                         />
                         <FormControlLabel control={
-                            <Checkbox value={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
+                            <Checkbox value={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} tabIndex={3} />
                         } label="Remember Me?" />
                         <Box sx={{ position: "relative", width: "100%" }}>
                             <Button
@@ -177,6 +181,7 @@ function Signin({ onForgotPassword }: SigninProps) {
                                 color="primary"
                                 fullWidth
                                 disabled={loading}
+                                tabIndex={4}
                             >
                                 Sign In with Email and Passwort
                             </Button>

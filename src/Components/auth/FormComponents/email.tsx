@@ -7,12 +7,14 @@ type EmailfieldProps = {
     setEmail: React.Dispatch<React.SetStateAction<string>>;
     EmailError: boolean;
     maxWidth?: number;
+    tabIndex?: number;
 };
 export function Emailfield({
     email,
     setEmail,
     EmailError,
-    maxWidth
+    maxWidth,
+    tabIndex
 }: EmailfieldProps) {
     return (
         <>
@@ -31,6 +33,8 @@ export function Emailfield({
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 error={EmailError}
+                helperText={EmailError ? "Please enter a valid email address." : ""}
+                tabIndex={tabIndex}
             />
         </>
     )

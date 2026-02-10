@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['lh3.googleusercontent.com', 'avatars.githubusercontent.com'],
   },
+  transpilePackages: ['mui-one-time-password-input'],
+
 };
 
 export default nextConfig;
