@@ -1,3 +1,5 @@
+"use client"
+//TODO: build a loading state or use the loading state from parent compunment 
 import { FormControl, InputLabel, Input, InputAdornment, IconButton } from "@mui/material";
 import { VisibilityOff, Visibility } from "@mui/icons-material";
 import * as React from "react";
