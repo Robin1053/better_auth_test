@@ -8,6 +8,7 @@ import { authClient } from "@/lib/auth-client";
 import { useNotification } from "@/Components/ui/NotificationProvider";
 import { Namefield } from "@/Components/auth/FormComponents/name";
 import { useRouter } from "next/navigation";
+import { fa } from "zod/locales";
 
 
 
@@ -58,6 +59,9 @@ function Signup() {
             return passwordRegex.test(password);
         }
     };
+    const isNameValid = (name: string): boolean => {
+        return name.trim().length > 0;
+    }
 
     async function handleEmailSignUp(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -65,8 +69,15 @@ function Signup() {
         setErrorMessage("");
         setEmailError(false);
         setPasswordError(false);
+        setNameError(false)
 
         //client Validirungen 
+        if (!isNameValid(name)) {
+            setLoading(false)
+            setNameError(true)
+            setErrorMessage("Please fill in the Name field")
+            return;
+        }
         if (!isEmailValid(email)) {
             setLoading(false)
             setErrorMessage("These E-Mail is invalid")
@@ -179,30 +190,45 @@ function Signup() {
                         sx={{ display: "flex", flexDirection: "column", gap: 2 }}
                     >
                         <Namefield
-                            Name={name}
-                            setName={setName}
-                            NameError={NameError}
-                            maxWidth={400}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            error={NameError}
+                            sx={{ maxWidth: 400 }}
+                            tabIndex={1}
+                            loading={loading}
+                            label="Name"
+
                         />
                         <Emailfield
-                            email={email}
-                            setEmail={setEmail}
-                            EmailError={EmailError}
-                            maxWidth={400}
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            error={EmailError}
+                            sx={{ maxWidth: 400 }}
+                            loading={loading}
+                            tabIndex={2}
+                            label="E-Mail"
                         />
                         <Passwordfield
-                            password={password}
-                            setPassword={setPassword}
-                            PasswordError={PasswordError}
-                            maxWidth={400}
-                            Label="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            error={PasswordError}
+                            loading={loading}
+                            sx={
+                                { maxWidth: 400 }
+                            }
+                            label="Password"
+                            tabIndex={3}
                         />
                         <Passwordfield
-                            password={password2}
-                            setPassword={setPassword2}
-                            PasswordError={PasswordError}
-                            maxWidth={400}
-                            Label="Repeat Passwort"
+                            value={password2}
+                            onChange={(e) => setPassword2(e.target.value)}
+                            error={PasswordError}
+                            loading={loading}
+                            sx={
+                                { maxWidth: 400 }
+                            }
+                            label="Repeat Password"
+                            tabIndex={4}
                         />
                         {/* TODO: Add terms and conditions checkbox, and an Image input */}
                         <Button type="submit" variant="contained" fullWidth color="primary">

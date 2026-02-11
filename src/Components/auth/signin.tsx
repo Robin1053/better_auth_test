@@ -144,11 +144,14 @@ function Signin({ onForgotPassword }: SigninProps) {
                         noValidate>
 
                         <Emailfield
-                            email={email}
-                            setEmail={setEmail}
-                            EmailError={EmailError}
-                            maxWidth={400}
-                            tabIndex={1}
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            error={EmailError}
+                            sx={{ maxWidth: 400 }}
+                            loading={loading}
+                            tabIndex={2}
+                            label="E-Mail"
+                            autoComplete="email webauthn"
                         />
 
                         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
@@ -164,12 +167,17 @@ function Signin({ onForgotPassword }: SigninProps) {
 
 
                         <Passwordfield
-                            password={password}
-                            setPassword={setPassword}
-                            PasswordError={PasswordError}
-                            maxWidth={400}
-                            Label="Password"
-                            tabIndex={2}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            error={PasswordError}
+                            loading={loading}
+                            sx={
+                                { maxWidth: 400 }
+                            }
+                            label="Password"
+                            tabIndex={3}
+                            autoComplete="current-password webauthn"
+
                         />
                         <FormControlLabel control={
                             <Checkbox value={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} tabIndex={3} />

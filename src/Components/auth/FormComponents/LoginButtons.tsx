@@ -1,5 +1,4 @@
 "use client";
-//TODO: build a loading state or use the loading state from parent compunment 
 import { Button, useTheme, CircularProgress, SvgIcon, Icon } from "@mui/material";
 import { JSX, useState } from "react";
 import { authClient } from "@/lib/auth-client";
@@ -8,8 +7,8 @@ type ButtonProps = {
   onClick: () => Promise<void> | void;
   label: string;
   icon: JSX.Element;
-  fullWidth?: boolean; // 100% Breite
-  width?: string | number; // z.B. "300px" oder 250
+  fullWidth?: boolean;
+  width?: string | number;
 };
 
 function AuthButton({ onClick, label, icon, fullWidth, width }: ButtonProps) {
@@ -30,11 +29,12 @@ function AuthButton({ onClick, label, icon, fullWidth, width }: ButtonProps) {
     <>
       <Button
         onClick={handleClick}
+        fullWidth={fullWidth}
         disabled={loading}
         variant="outlined"
         className="h-12 rounded-xl font-medium flex items-center justify-center gap-3"
         sx={{
-          width: fullWidth ? "100%" : width ? width : "auto",
+          width: width,
           backgroundColor: isDark ? "#131314" : "#fff",
           color: isDark ? "#E3E3E3" : "#3c4043",
           borderColor: isDark ? "#3c4043" : "#dadce0",
@@ -43,7 +43,7 @@ function AuthButton({ onClick, label, icon, fullWidth, width }: ButtonProps) {
           "&:hover": {
             backgroundColor: isDark ? "#2a2a2a" : "#f7f7f7",
             borderColor: isDark ? "#5f6368" : "#c6c6c6",
-          },
+          }
         }}
         startIcon={!loading ? icon : undefined}
       >

@@ -1,39 +1,36 @@
-"use client"
-//TODO: build a loading state or use the loading state from parent compunment 
-import { TextField } from "@mui/material"
-import * as React from "react"
+"use client";
 
+import {
+    TextField,
+    CircularProgress,
+    InputAdornment,
+    TextFieldProps
+} from "@mui/material";
+import * as React from "react";
 
 type NamefieldProps = {
-    Name: string;
-    setName: React.Dispatch<React.SetStateAction<string>>;
-    NameError: boolean;
-    maxWidth?: number;
-};
-export function Namefield({
-    Name,
-    setName,
-    NameError,
-    maxWidth
-}: NamefieldProps) {
+    loading?: boolean;
+} & TextFieldProps;
+
+export const Namefield = React.forwardRef<
+    HTMLInputElement,
+    NamefieldProps
+>(function Namefield(
+    {
+        loading = false,
+        variant = "outlined",
+        fullWidth = true,
+        ...props
+    },
+    ref
+) {
     return (
-        <>
-            <TextField
-                sx={
-                    {
-                        maxWidth: maxWidth
-                    }
-                }
-                fullWidth
-                id="name"
-                label="Max Mustermann"
-                variant="standard"
-                name="Name"
-                value={Name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                error={NameError}
-            />
-        </>
-    )
-}
+        <TextField
+            {...props}
+            inputRef={ref}
+            variant={variant}
+            fullWidth={fullWidth}
+            disabled={loading}
+        />
+    );
+});

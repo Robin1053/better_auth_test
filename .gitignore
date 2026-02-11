@@ -44,3 +44,11 @@ next-env.d.ts
 # DB 
 *.sqlite
 *.db
+
+/generated/prisma
+
+/src/generated/prisma
+
+/src/generated/prisma
+
+/generated/prisma
