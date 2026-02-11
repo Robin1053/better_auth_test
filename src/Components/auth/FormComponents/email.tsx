@@ -1,3 +1,5 @@
+"use client"
+//TODO: build a loading state or use the loading state from parent compunment 
 import { TextField } from "@mui/material"
 import * as React from "react"
 
