@@ -10,7 +10,8 @@ export const authClient = createAuthClient({
     twoFactorClient(),
     oneTapClient(
       {
-        clientId: process.env.GOOGLE_CLIENT_ID as string,
+
+        clientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string,
         autoSelect: true,
         uxMode: "popup",
         cancelOnTapOutside: true,

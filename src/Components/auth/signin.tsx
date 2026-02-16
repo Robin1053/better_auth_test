@@ -8,6 +8,7 @@ import { Passwordfield } from "@/Components/auth/FormComponents/Password";
 import { Emailfield } from "@/Components/auth/FormComponents/email";
 import { useNotification } from "@/Components/ui/NotificationProvider";
 import { useRouter } from "next/navigation";
+import { theme } from "@/theme/mui";
 
 
 type SigninProps = {
@@ -16,8 +17,29 @@ type SigninProps = {
 const { data: session } = await authClient.getSession()
 
 function Signin({ onForgotPassword }: SigninProps) {
-    const router = useRouter();
 
+
+    async function handleOneTap() {
+        await authClient.oneTap({
+            uxMode: "popup",
+            button: {
+                container: "#google-signin-button",
+                config: {
+                    theme: theme.palette.mode === "dark" ? "filled_black" : "outline",
+                    size: "large",
+                    type: "standard",
+                    text: "signin_with",
+                    width: 400,
+                }
+            }
+        });
+    }
+    console.log(process.env.GOOGLE_CLIENT_ID)
+
+    handleOneTap();
+
+
+    const router = useRouter();
 
     //session check
     if (session) {
@@ -231,8 +253,9 @@ function Signin({ onForgotPassword }: SigninProps) {
                         }
                     </Box>
                     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        <div id="google-signin-button"></div>
                         {[{ button: PasskeyButton, used: wasPasskey },
-                        { button: GoogleButton, used: wasGoogle },
+                        //    { button: GoogleButton, used: wasGoogle },
                         { button: GitHubButton, used: wasGitHub }].map((item, index) => (
                             <Box key={index} sx={{ position: "relative", width: 400 }}>
                                 <item.button width={400} />

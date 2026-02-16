@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-page-custom-font */
+/* eslint-disable @next/next/google-font-display */
 "use client";
 
 import { NotificationProvider } from "@/Components/ui/NotificationProvider";
@@ -6,6 +8,7 @@ import { theme } from "@/theme/mui";
 import { Box, ThemeProvider } from "@mui/material";
 import { Roboto } from 'next/font/google';
 import { AppBar } from "@/Components/ui/AppBar/Appbar";
+import { authClient } from "@/lib/auth-client";
 
 const RobotoFont = Roboto({
   weight: ['300', '400', '500', '700'],
@@ -18,7 +21,7 @@ export default function RootLayout({
 }>) {
 
   return (
-    <html lang="de">
+    <html lang="de" suppressHydrationWarning >
       <head>
         <link
           rel="stylesheet"
@@ -35,7 +38,9 @@ export default function RootLayout({
               height: "100vh",
               width: "100vw",
             }
-          }>
+          }
+          suppressHydrationWarning 
+          >
           <ThemeProvider theme={theme}>
             <NotificationProvider>
               <AppBar />
