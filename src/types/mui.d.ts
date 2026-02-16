@@ -1,3 +1,4 @@
+import { Typography } from '@mui/material';
 import "@mui/material/styles";
 
 declare module "@mui/material/styles" {
@@ -119,6 +120,12 @@ declare module "@mui/material/PaginationItem" {
 }
 
 declare module "@mui/material/SpeedDial" {
+  interface SpeedDialPropsColorOverrides {
+    tertiary: true;
+  }
+}
+
+declare module "@mui/material/Typography" {
   interface SpeedDialPropsColorOverrides {
     tertiary: true;
   }

@@ -3,6 +3,8 @@ import { passkeyClient } from "@better-auth/passkey/client"; // import the clien
 import { adminClient, lastLoginMethodClient, oneTapClient, twoFactorClient } from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
+
+
   plugins: [
     passkeyClient(),
     adminClient(),
@@ -19,3 +21,5 @@ export const authClient = createAuthClient({
     )
   ],
 });
+
+export type Session = typeof authClient.$Infer.Session

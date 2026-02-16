@@ -9,6 +9,7 @@ import { Emailfield } from "@/Components/auth/FormComponents/email";
 import { useNotification } from "@/Components/ui/NotificationProvider";
 import { useRouter } from "next/navigation";
 import { theme } from "@/theme/mui";
+import { set } from "zod";
 
 
 type SigninProps = {
@@ -97,54 +98,51 @@ function Signin({ onForgotPassword }: SigninProps) {
             setLoading(false)
             return;
         }
-        try {
-            const { data, error } = await authClient.signIn.email({
-                email,
-                password,
-                rememberMe,
-                callbackURL: "/"
-            });
-            if (error) {
-                switch (error.code) {
-                    case "invalid_email":
-                        setEmailError(true);
-                        setErrorMessage("These E-Mail is invalid.");
-                        break;
-
-                    case "invalid_password":
-                        setPasswordError(true);
-                        setErrorMessage("Wrong Passwort.");
-                        break;
-
-                    case "user_not_found":
-                        setEmailError(true);
-                        setErrorMessage("There is no userer with this password.");
-                        break;
-
-                    case "too_many_requests":
-                        setErrorMessage(
-                            "Too many login attempts. Please try again later.."
-                        );
-                        break;
-
-                    default:
-                        setErrorMessage("Unknown error: " + error.message);
+        await authClient.signIn.email({
+            email: email,
+            password: password,
+        },
+            {
+                async onSuccess(context) {
+                    setLoading(false)
+                    setEmailError(false);
+                    setPasswordError(false);
+                    setEmail("");
+                    setPassword("");
+                    if (context.data.twoFactorRedirect) {
+                        notify({
+                            message: "Please complete the two-factor authentication to proceed.",
+                            type: "info",
+                        });
+                        router.push("/auth?view=twoFactor")
+                    }
+                },
+                onError(error) {
+                    setErrorMessage(error.error.message || "An error occurred during sign-in.");
+                    setLoading(false);
+                    if (error.error.code === "INVALID_EMAIL_OR_PASSWORD") {
                         setEmailError(true);
                         setPasswordError(true);
+                    }
+                    if (error.error.code === "UserNotFound") {
+                        setEmailError(true);
+                        setErrorMessage(error.error.message || "No account found with this email.");
+                    }
+                    if (error.error.code === "TooManyAttempts") {
+                        setErrorMessage(error.error.message || "Too many failed attempts. Please try again later.");
+                        notify({
+                            message: error.error.message || "Too many failed attempts. Please try again later.",
+                            type: "error",
+                        });
+                    }
+                },
+                onUnexpectedError() {
+                    setErrorMessage("An unexpected error occurred. Please try again.");
+                    setLoading(false);
                 }
-
-                console.error("Better Auth Eror:", error);
-                return;
             }
-            //TODO: Handle successful login, e.g. redirect to dashboard or show success message or redirect to OTP page if 2FA is enabled.
-            notify({ message: "Signin successful!", type: "success" });
+        )
 
-        } catch (err) {
-            console.error("Unexpected error:", err);
-            setErrorMessage("An unexpected error has occurred.: " + String(err));
-        } finally {
-            setLoading(false);
-        }
     }
 
     return (
