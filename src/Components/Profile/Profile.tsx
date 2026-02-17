@@ -12,15 +12,12 @@ function Profile() {
     const { data: session } = authClient.useSession()
 
 
-    const router = useRouter();
     const [value, setValue] = React.useState(0);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
-    if (!session) {
-        router.push('/auth?view=signin')
-    }
+
     return (
         <>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>

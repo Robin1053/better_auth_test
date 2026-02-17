@@ -68,4 +68,11 @@ export const auth = betterAuth({
       },
     })
   ],
+  user: {
+    changeEmail: {
+      enabled: true,
+      updateEmailWithoutVerification: true,
+    }
+  },
+
 });
