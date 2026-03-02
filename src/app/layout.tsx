@@ -8,12 +8,13 @@ import { theme } from "@/theme/mui";
 import { Box, ThemeProvider } from "@mui/material";
 import { Roboto } from 'next/font/google';
 import { AppBar } from "@/Components/ui/AppBar/Appbar";
-import { authClient } from "@/lib/auth-client";
+
 
 const RobotoFont = Roboto({
   weight: ['300', '400', '500', '700'],
   subsets: ['latin'],
 });
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -39,8 +40,8 @@ export default function RootLayout({
               width: "100vw",
             }
           }
-          suppressHydrationWarning 
-          >
+          suppressHydrationWarning
+        >
           <ThemeProvider theme={theme}>
             <NotificationProvider>
               <AppBar />

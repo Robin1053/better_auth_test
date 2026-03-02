@@ -1,14 +1,11 @@
-import { Avatar, Badge, Box, IconButton, Typography, TextField, Divider } from "@mui/material";
+import { Avatar, Badge, Box, IconButton, Typography, TextField, Divider, Button } from "@mui/material";
 import { authClient, Session } from "@/lib/auth-client";
 import * as React from "react";
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { Emailfield } from "@/Components/auth/FormComponents/email";
-import { ActionButton } from "@/Components/ui/action-button";
-
-
-
+ 
 type Props = {
-    session: Session | null;
+    session: Session;
 };
 
 function UserProfile({ session }: Props) {
@@ -106,9 +103,16 @@ function UserProfile({ session }: Props) {
                             }
                         }
                     />
-                    <ActionButton
-                        action={updateUser}
-                    />
+                    <Button
+                        variant="contained"
+                        onClick={updateUser}
+                        sx={{
+                            mt: 2,
+                            width: 400
+                        }}
+                    >
+                        Update Profile
+                    </Button>
                 </Box >
             </Box >
 
