@@ -1,5 +1,5 @@
-[![Last Commit](https://img.shields.io/github/last-commit/Robin1053/better_auth_test)](https://github.com/Robin1053/better_auth_test/commits/main)
-[![Open Issues](https://img.shields.io/github/issues/Robin1053/better_auth_test)](https://github.com/Robin1053/better_auth_test/issues)
+![GitHub License](https://img.shields.io/github/license/Robin1053/better_auth_test)
+![GitHub last commit](https://img.shields.io/github/last-commit/Robin1053/better_auth_test)
 [![Repo Size](https://img.shields.io/github/repo-size/Robin1053/better_auth_test)](https://github.com/Robin1053/better_auth_test)
 [![Top Language](https://img.shields.io/github/languages/top/Robin1053/better_auth_test)](https://github.com/Robin1053/better_auth_test)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
