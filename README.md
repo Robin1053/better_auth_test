@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+[![Last Commit](https://img.shields.io/github/last-commit/Robin1053/better_auth_test)](https://github.com/Robin1053/better_auth_test/commits/main)
+[![Open Issues](https://img.shields.io/github/issues/Robin1053/better_auth_test)](https://github.com/Robin1053/better_auth_test/issues)
+[![Repo Size](https://img.shields.io/github/repo-size/Robin1053/better_auth_test)](https://github.com/Robin1053/better_auth_test)
+[![Top Language](https://img.shields.io/github/languages/top/Robin1053/better_auth_test)](https://github.com/Robin1053/better_auth_test)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 
-## Getting Started
+# better_auth_test
 
-First, run the development server:
+`better_auth_test` ist ein Auth-Demo-Projekt mit **Next.js 16**, **Better Auth** und **Prisma (SQLite)**.
+Der Fokus liegt auf modernen Login-Flows (inkl. OAuth, Passkeys und 2FA) mit einer UI auf Basis von React/MUI.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## ✅ Aktueller Projektaufbau
+
+```text
+./
+├── src/
+│   ├── app/                 # Next.js App Router Seiten & API Routes
+│   ├── Components/          # UI- und Auth-Komponenten
+│   └── lib/                 # Auth-/Mail-/Prisma-nahe Logik
+├── prisma/
+│   └── schema.prisma        # Prisma Schema (SQLite)
+├── better-auth_migrations/  # Better Auth Migrationen
+└── README.md
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Hauptfunktionen
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- E-Mail/Passwort-Authentifizierung
+- Social Login über Google und GitHub
+- Passkey-Unterstützung
+- Two-Factor Authentication (2FA)
+- Better-Auth-Plugins (`admin`, `oneTap`, `lastLoginMethod`, `twoFactor`)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Voraussetzungen
 
-## Learn More
+- Node.js 20+
+- npm
 
-To learn more about Next.js, take a look at the following resources:
+## Entwicklung (lokal)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Abhängigkeiten installieren:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm ci
+   ```
 
-## Deploy on Vercel
+2. Prisma Client generieren:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```bash
+   npx prisma generate
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. Umgebungsvariablen in `.env` setzen:
+
+   ```env
+   BETTER_AUTH_BASE_URL=http://localhost:3000
+   BETTER_AUTH_SECRET=your-secret
+   GOOGLE_CLIENT_ID=
+   GOOGLE_CLIENT_SECRET=
+   GITHUB_CLIENT_ID=
+   GITHUB_CLIENT_SECRET=
+   NEXT_PUBLIC_GOOGLE_CLIENT_ID=
+   ```
+
+4. Development-Server starten:
+
+   ```bash
+   npm run dev
+   ```
+
+Danach ist die App unter [http://localhost:3000](http://localhost:3000) erreichbar.
+
+## Verfügbare Scripts
+
+- `npm run dev` – Entwicklungsserver starten
+- `npm run build` – Production-Build erstellen
+- `npm run start` – Production-Build starten
+- `npm run lint` – ESLint ausführen
+- `npm run db:ps` – Prisma Studio öffnen
+
+## Konfiguration & Hinweise
+
+- Datenbank: SQLite via Prisma
+- Prisma-Client-Ausgabe: `generated/prisma`
+- Mail-Verifizierung ist auf lokalen SMTP-Host (`localhost:1025`) ausgelegt
