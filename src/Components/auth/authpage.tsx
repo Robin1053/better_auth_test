@@ -9,6 +9,7 @@ import Signup from './signup';
 import { useEffect } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { TwoFaktor } from './twoFaktor';
+import { Verfication } from './Verfication';
 
 function AuthPageComponent() {
     const router = useRouter();
@@ -53,7 +54,7 @@ function AuthPageComponent() {
         }
     };
 
-    
+
     useEffect(() => {
         if (!PublicKeyCredential.isConditionalMediationAvailable ||
             !PublicKeyCredential.isConditionalMediationAvailable()) {
@@ -76,7 +77,7 @@ function AuthPageComponent() {
                     <TabPanel value="2"><Signup /></TabPanel>
                     <TabPanel value="3"><TwoFaktor /></TabPanel>
                     <TabPanel value="4">Forgot Passwort</TabPanel>
-                    <TabPanel value="5">Passwort Verfication</TabPanel>
+                    <TabPanel value="5"><Verfication /></TabPanel>
 
                 </TabContext>
             </Box>

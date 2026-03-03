@@ -1,11 +1,11 @@
-import { Avatar, Badge, Box, IconButton, Typography, TextField, Divider, Button } from "@mui/material";
+import { Avatar, Badge, Box, IconButton, Typography, TextField, Divider, Button, Alert } from "@mui/material";
 import { authClient, Session } from "@/lib/auth-client";
 import * as React from "react";
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { Emailfield } from "@/Components/auth/FormComponents/email";
- 
+
 type Props = {
-    session: Session;
+    session: Session | null;
 };
 
 function UserProfile({ session }: Props) {
@@ -13,20 +13,29 @@ function UserProfile({ session }: Props) {
     const [image, setImage] = React.useState(session?.user.image);
     const [Name, setName] = React.useState(session?.user.name)
     const [Email, setEmail] = React.useState(session?.user.email)
+    const [error, setError] = React.useState<string | null>(null);
 
 
-
-    function updateUser() {
-        authClient.updateUser({
-            name: Name,
-            image: image,
-        }).catch((error) => {
+    async function updateUser() {
+        try {
+            await authClient.updateUser({
+                name: Name,
+                image: image,
+            });
+        } catch((error)){
+            setError(error)
         }
-        );
+        if (Email !== session?.user.email) {
+            authClient.changeEmail({
+                newEmail: Email as string,
+            }).catch((error) => {
+                setError(error.message || "Failed to change email");
+            })
+        }
     }
 
-    const handleUpload = (event) => {
-        const file = event.target.files[0];
+    const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
         if (file) {
             setImage(URL.createObjectURL(file));
         }
@@ -103,6 +112,13 @@ function UserProfile({ session }: Props) {
                             }
                         }
                     />
+                    {error && (
+                        <Alert
+                            variant="outlined"
+                            severity="error">
+                            {error}
+                        </Alert>
+                    )}
                     <Button
                         variant="contained"
                         onClick={updateUser}

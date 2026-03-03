@@ -5,7 +5,7 @@ import { admin, lastLoginMethod, oneTap, twoFactor } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { PrismaClient } from '../../generated/prisma/client';
-
+import sendVerificationEmail from "./mail"; 
 const adapter = new PrismaBetterSqlite3({
   url: "file:./dev.db"
 })
@@ -25,6 +25,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
+    sendVerificationEmail: sendVerificationEmail,
   },
   socialProviders: {
     google: {
