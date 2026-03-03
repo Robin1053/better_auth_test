@@ -52,7 +52,7 @@ App öffnen unter [http://localhost:3000](http://localhost:3000).
 
 ## Verfügbare Scripts
 
-- `npm run dev` – Startet die App im Dev-Modus
+- `npm run dev` – Startet die App im Development-Modus
 - `npm run build` – Erstellt ein Production-Build
 - `npm run start` – Startet das Production-Build
 - `npm run lint` – Führt ESLint aus
