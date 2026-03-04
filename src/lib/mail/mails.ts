@@ -1,24 +1,29 @@
 import nodemailer from "nodemailer";
-import { theme } from "@/theme/mui.ts"
+import { theme } from "@/theme/mui"
+
+
 const transporter = nodemailer.createTransport({
-    host: "localhost",
-    port: 1025,
-    secure: false,
+  host: "localhost",
+  port: 1025,
+  secure: false,
 });
 
-constconst sendVerificationEmail = async ({ user, token }: { user: { email: string }, token: string }) => {
-    const baseUrl = process.env.BETTER_AUTH_BASE_URL?.replace(/\/$/, "") || "http://localhost:3000";
-    const verificationUrl = `${baseUrl}/auth?view=verification&token=${token}`;
+const sendVerificationEmail = async ({ user, token }: { user: { email: string, name: string }, token: string }) => {
+  const baseUrl = process.env.BETTER_AUTH_BASE_URL?.replace(/\/$/, "") || "http://localhost:3000";
+  const verificationUrl = `${baseUrl}/auth?view=verification&token=${token}`;
 
-    const colors = {
-        primary: theme.palette.primary.main,
-        background: theme.palette.background.default,
-        surface: theme.palette.background.paper,
-        textPrimary: theme.palette.text.primary,
-        textSecondary: theme.palette.text.secondary,
-    };
 
-    const htmlLayout = `
+  console.log("Sending verification email to:", user.email);
+  console.log("Verification URL:", verificationUrl);
+  const colors = {
+    primary: theme.palette.primary.main,
+    background: theme.palette.background.default,
+    surface: theme.palette.background.paper,
+    textPrimary: theme.palette.text.primary,
+    textSecondary: theme.palette.text.secondary,
+  };
+
+  const htmlLayout = `
     <!DOCTYPE html>
     <html lang="de">
       <head>
@@ -51,6 +56,8 @@ constconst sendVerificationEmail = async ({ user, token }: { user: { email: stri
                     </div>
                     <h1 style="margin: 0; font-size: 24px; font-weight: 700;">E-Mail bestätigen</h1>
                     <p class="text-muted" style="margin: 20px 0; font-size: 16px; line-height: 1.5; color: #4B5563;">
+                      Hallo ${user.name},
+                      <br><br>
                       Tippe auf den Button, um deine Registrierung für <b style="color: ${colors.primary};">Better Auth</b> abzuschließen.
                     </p>
                     <a href="${verificationUrl}" style="background-color: ${colors.primary}; color: #0B1020; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block; margin-top: 10px; letter-spacing: 0.5px;">
@@ -65,29 +72,30 @@ constconst sendVerificationEmail = async ({ user, token }: { user: { email: stri
       </body>
     </html>
     `
-    return await transporter.sendMail({
-        from: '"Better Auth" <no-reply@deinedomain.de>',
-        to: user.email,
-        subject: "Verifiziere deine E-Mail",
-        text: `Verifiziere bitte deine E-Mail: ${verificationUrl}`, 
-        html: htmlLayout,
-    });};
+  return await transporter.sendMail({
+    from: '"Better Auth" <no-reply@deinedomain.de>',
+    to: user.email,
+    subject: "Verifiziere deine E-Mail",
+    text: `Verifiziere bitte deine E-Mail: ${verificationUrl}`,
+    html: htmlLayout,
+  });
+};
 
 
 
-const sendPasswordResetEmail = async ({ user, token }: { user: { email: string }, token: string }) => {
-    const baseUrl = process.env.BETTER_AUTH_BASE_URL?.replace(/\/$/, "") || "http://localhost:3000";
-    const resetUrl = `${baseUrl}/auth?view=reset-password&token=${token}`;
+const sendPasswordResetEmail = async ({ user, token }: { user: { email: string, name: string }, token: string }) => {
+  const baseUrl = process.env.BETTER_AUTH_BASE_URL?.replace(/\/$/, "") || "http://localhost:3000";
+  const resetUrl = `${baseUrl}/auth?view=reset-password&token=${token}`;
 
-    const colors = {
-        primary: theme.palette.primary.main,
-        background: theme.palette.background.default,
-        surface: theme.palette.background.paper,
-        textPrimary: theme.palette.text.primary,
-        textSecondary: theme.palette.text.secondary,
-    };
+  const colors = {
+    primary: theme.palette.primary.main,
+    background: theme.palette.background.default,
+    surface: theme.palette.background.paper,
+    textPrimary: theme.palette.text.primary,
+    textSecondary: theme.palette.text.secondary,
+  };
 
-    const htmlLayout = `
+  const htmlLayout = `
     <!DOCTYPE html>
     <html lang="de">
       <head>
@@ -120,6 +128,8 @@ const sendPasswordResetEmail = async ({ user, token }: { user: { email: string }
                     </div>
                     <h1 style="margin: 0; font-size: 24px; font-weight: 700;">Passwort zurücksetzen</h1>
                     <p class="text-muted" style="margin: 20px 0; font-size: 16px; line-height: 1.5; color: #4B5563;">
+                      Hallo ${user.name},
+                      <br><br>
                       Du hast eine Anfrage zum Zurücksetzen deines Passworts für <b style="color: ${colors.primary};">Better Auth</b> gestellt.
                     </p>
                     <a href="${resetUrl}" style="background-color: ${colors.primary}; color: #0B1020; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block; margin-top: 10px; letter-spacing: 0.5px;">
@@ -134,14 +144,13 @@ const sendPasswordResetEmail = async ({ user, token }: { user: { email: string }
       </body>
     </html>
     `
-return await transporter.sendMail({
-        from: '"Better Auth Support" <support@deinedomain.de>',
-        to: user.email,
-        subject: "Passwort zurücksetzen",
-        text: `Passwort zurücksetzen: ${resetUrl}`,
-        html: htmlLayout,
-    });
+  return await transporter.sendMail({
+    from: '"Better Auth Support" <support@deinedomain.de>',
+    to: user.email,
+    subject: "Passwort zurücksetzen",
+    text: `Passwort zurücksetzen: ${resetUrl}`,
+    html: htmlLayout,
+  });
 };
 
-
-export default sendVerificationEmail;
+export { sendVerificationEmail, sendPasswordResetEmail };

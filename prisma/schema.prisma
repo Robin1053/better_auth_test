@@ -26,6 +26,8 @@ model User {
   passkeys         Passkey[]
   twofactors       TwoFactor[]
 
+  birthday DateTime?
+
   @@unique([email])
   @@map("user")
 }

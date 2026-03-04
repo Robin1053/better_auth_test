@@ -157,7 +157,7 @@ function Signup() {
                 }
                 return
             }
-            notify({ message: "Signup successful!", type: "success" });
+            notify({ message: "Signup successful! please check your email for verification.", type: "success" });
         } catch (err) {
             console.error("Unexpected error:", err);
             setErrorMessage("An unexpected error has occurred.: " + String(err));
@@ -197,6 +197,8 @@ function Signup() {
                             tabIndex={1}
                             loading={loading}
                             label="Name"
+                            autoComplete="webauthn"
+
 
                         />
                         <Emailfield
@@ -207,6 +209,7 @@ function Signup() {
                             loading={loading}
                             tabIndex={2}
                             label="E-Mail"
+                            autoComplete="webauthn"
                         />
                         <Passwordfield
                             value={password}
@@ -218,6 +221,8 @@ function Signup() {
                             }
                             label="Password"
                             tabIndex={3}
+                            autoComplete="webauthn"
+
                         />
                         <Passwordfield
                             value={password2}
