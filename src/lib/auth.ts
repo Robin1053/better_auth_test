@@ -7,6 +7,7 @@ import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { PrismaClient } from '../../generated/prisma/client';
 import { sendPasswordResetEmail as sendPasswordResetMail, sendVerificationEmail as sendVerificationMail } from "./mail/mails";
 import { inferAdditionalFields } from "better-auth/client/plugins";
+import { createAuthMiddleware } from "better-auth/api";
 const adapter = new PrismaBetterSqlite3({
   url: "file:./dev.db"
 })
@@ -41,18 +42,11 @@ export const auth = betterAuth({
         "https://www.googleapis.com/auth/user.birthday.read"
       ],
       mapProfileToUser: (profile) => {
-        const profileData = profile as { birthdays?: Array<{ date: { year: number; month: number; day: number } }> };
         return {
           email: profile.email,
           name: profile.name,
           avatarUrl: profile.picture,
           emailVerified: profile.email_verified,
-          birthday: profileData.birthdays?.[0]?.date ?
-            new Date(
-              profileData.birthdays[0].date.year,
-              profileData.birthdays[0].date.month - 1,
-              profileData.birthdays[0].date.day
-            ) : undefined,
         };
       }
     },
@@ -101,6 +95,64 @@ export const auth = betterAuth({
         input: true,
       }
     }
+  },
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      // Nur bei OAuth Callback ausführen
+      if (ctx.path.startsWith("/callback") && ctx.context.newSession) {
+        const newSession = ctx.context.newSession;
+        
+        if (newSession?.user?.id) {
+          const userId = newSession.user.id;
+          
+          // Warte kurz, damit der Account gespeichert ist
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          // Hole das Google Access Token
+          const account = await prisma.account.findFirst({
+            where: {
+              userId: userId,
+              providerId: "google",
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          });
+
+          if (account?.accessToken) {
+            try {
+              const response = await fetch(
+                'https://people.googleapis.com/v1/people/me?personFields=birthdays',
+                {
+                  headers: {
+                    Authorization: `Bearer ${account.accessToken}`,
+                  },
+                }
+              );
+
+              if (response.ok) {
+                const data = await response.json();
+
+                if (data.birthdays?.[0]?.date) {
+                  const bday = data.birthdays[0].date;
+                  if (bday.year && bday.month && bday.day) {
+                    const birthday = new Date(bday.year, bday.month, bday.day);
+                    
+                    // Update User mit Birthday
+                    await prisma.user.update({
+                      where: { id: userId },
+                      data: { birthday },
+                    });
+                  }
+                }
+              }
+            } catch (error) {
+              console.error("Error fetching birthday from Google People API:", error);
+            }
+          }
+        }
+      }
+    }),
   },
 
 });

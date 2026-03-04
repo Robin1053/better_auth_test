@@ -22,8 +22,8 @@ function UserProfile({ session }: Props) {
                 name: Name,
                 image: image,
             });
-        } catch((error)){
-            setError(error)
+        } catch (error) {
+            setError(error.message || "Failed to update profile");
         }
         if (Email !== session?.user.email) {
             authClient.changeEmail({

@@ -251,9 +251,8 @@ function Signin({ onForgotPassword }: SigninProps) {
                         }
                     </Box>
                     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        <div id="google-signin-button"></div>
                         {[{ button: PasskeyButton, used: wasPasskey },
-                        //    { button: GoogleButton, used: wasGoogle },
+                        { button: GoogleButton, used: wasGoogle },
                         { button: GitHubButton, used: wasGitHub }].map((item, index) => (
                             <Box key={index} sx={{ position: "relative", width: 400 }}>
                                 <item.button width={400} />
