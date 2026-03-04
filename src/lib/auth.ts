@@ -5,7 +5,7 @@ import { admin, lastLoginMethod, oneTap, twoFactor } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { PrismaClient } from '../../generated/prisma/client';
-import sendVerificationEmail from "./mail"; 
+import SendVerificationEmail from "./mail";
 const adapter = new PrismaBetterSqlite3({
   url: "file:./dev.db"
 })
@@ -25,21 +25,27 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     autoSignIn: true,
-    sendVerificationEmail: sendVerificationEmail,
+    sendVerificationEmail: SendVerificationEmail,
   },
   socialProviders: {
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      scope: [
+        "https://www.googleapis.com/auth/user.birthday.read"
+      ],
       mapProfileToUser: (profile) => {
         return {
           email: profile.email,
           name: profile.name,
           avatarUrl: profile.picture,
+          emailVerified: profile.email_verified,
+          birthday: profile.birthday ? new Date(profile.birthday) : undefined,
         };
       }
     },
     github: {
+
       clientId: process.env.GITHUB_CLIENT_ID as string,
       clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
       mapProfileToUser: (profile) => {
@@ -47,6 +53,8 @@ export const auth = betterAuth({
           email: profile.email,
           name: profile.name,
           avatarUrl: profile.avatar_url,
+          emailVerified: true,
+          birthday: profile.birthday ? new Date(profile.birthday) : undefined,
         };
       }
     },
@@ -73,6 +81,11 @@ export const auth = betterAuth({
     changeEmail: {
       enabled: true,
       updateEmailWithoutVerification: true,
+    },
+    additionalFields : {
+      birthday: {
+        type: "date",
+      }
     }
   },
 
