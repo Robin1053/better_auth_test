@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-
+import { theme } from "@/theme/mui.ts"
 const transporter = nodemailer.createTransport({
     host: "localhost",
     port: 1025,
@@ -11,11 +11,11 @@ constconst sendVerificationEmail = async ({ user, token }: { user: { email: stri
     const verificationUrl = `${baseUrl}/auth?view=verification&token=${token}`;
 
     const colors = {
-        primary: "#7AA2F7",
-        background: "#121212",
-        surface: "#212121",
-        textPrimary: "#E5E7EB",
-        textSecondary: "#9CA3AF",
+        primary: theme.palette.primary.main,
+        background: theme.palette.background.default,
+        surface: theme.palette.background.paper,
+        textPrimary: theme.palette.text.primary,
+        textSecondary: theme.palette.text.secondary,
     };
 
     const htmlLayout = `
@@ -69,7 +69,7 @@ constconst sendVerificationEmail = async ({ user, token }: { user: { email: stri
         from: '"Better Auth" <no-reply@deinedomain.de>',
         to: user.email,
         subject: "Verifiziere deine E-Mail",
-        text: `Verifiziere bitte deine E-Mail: ${verificationUrl}`, // Text-Fallback
+        text: `Verifiziere bitte deine E-Mail: ${verificationUrl}`, 
         html: htmlLayout,
     });};
 
@@ -80,11 +80,11 @@ const sendPasswordResetEmail = async ({ user, token }: { user: { email: string }
     const resetUrl = `${baseUrl}/auth?view=reset-password&token=${token}`;
 
     const colors = {
-        primary: "#7AA2F7",
-        background: "#121212",
-        surface: "#212121",
-        textPrimary: "#E5E7EB",
-        textSecondary: "#9CA3AF",
+        primary: theme.palette.primary.main,
+        background: theme.palette.background.default,
+        surface: theme.palette.background.paper,
+        textPrimary: theme.palette.text.primary,
+        textSecondary: theme.palette.text.secondary,
     };
 
     const htmlLayout = `
