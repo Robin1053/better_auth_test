@@ -246,7 +246,7 @@ function Signup() {
                     {!loading && (
                         <Divider>Or Sign up with</Divider>
                     )}
-                    <Box>
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                         <GoogleButton width={400} />
                         <GitHubButton width={400} />
                     </Box>

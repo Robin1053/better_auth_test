@@ -50,7 +50,7 @@ function AuthPageComponent() {
         setPage(newValue);
         const nextView = tabToView[newValue];
         if (nextView) {
-            router.replace(`?view=${nextView}`, { scroll: false });
+            router.replace(`?view=${nextView}`, { scroll: true });
         }
     };
 

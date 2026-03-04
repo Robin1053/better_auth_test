@@ -8,6 +8,8 @@ import { theme } from "@/theme/mui";
 import { Box, ThemeProvider } from "@mui/material";
 import { Roboto } from 'next/font/google';
 import { AppBar } from "@/Components/ui/AppBar/Appbar";
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 
 const RobotoFont = Roboto({
@@ -44,8 +46,10 @@ export default function RootLayout({
         >
           <ThemeProvider theme={theme}>
             <NotificationProvider>
-              <AppBar />
-              {children}
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <AppBar />
+                {children}
+              </LocalizationProvider>
             </NotificationProvider>
           </ThemeProvider>
         </Box>

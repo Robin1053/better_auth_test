@@ -15,5 +15,6 @@ export default function Logout() {
         };
 
         logout();
-    }, [router]); return <Box sx={{ display: "flex", justifyContent: "center", height: "80vh", alignItems: "center" }}><Typography variant="h1" color='error'>{"You shouldn't see this. 🤔"}</Typography></Box>
+    }, [router]);
+    return <Box sx={{ display: "flex", justifyContent: "center", height: "80vh", alignItems: "center" }}><Typography variant="h1" color='error'>{"You shouldn't see this. "}<span className="material-symbols-outlined">wrong_location</span></Typography></Box>
 }
