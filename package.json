@@ -1,7 +1,17 @@
 {
   "name": "better_auth_test",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
+  "homepage": "https://github.com/Robin1053/better_auth_test",
+  "bugs": {
+    "url": "https://github.com/Robin1053/better_auth_test/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Robin1053/better_auth_test.git"
+  },
+  "license": "MIT",
+  "author": "robin1053",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
