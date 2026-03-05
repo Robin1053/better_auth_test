@@ -1,6 +1,8 @@
 "use client"
 import { authClient } from "@/lib/auth-client";
 import Typography from '@mui/material/Typography'
+import {ActionButton} from "@robineb/mui-utility"
+
 const { data: session } = await authClient.getSession()
 
 export default function Home() {
@@ -23,16 +25,16 @@ export default function Home() {
               {
                 display: "flex",
                 justifyContent: "center"
+              }
             }
-          }
           >Welcome, {session.user.name}</Typography>
         </div >
       ) : (
-    <div>
-      <h1>You are not logged in.</h1>
-    </div>
-  )
-}
+        <div>
+          <h1>You are not logged in.</h1>
+        </div>
+      )
+      }
     </>
   );
 }

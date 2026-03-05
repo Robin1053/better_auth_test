@@ -5,13 +5,9 @@ import { GitHubButton, GoogleButton } from "@/Components/auth/FormComponents/Log
 import { Passwordfield } from "@/Components/auth/FormComponents/Password";
 import { Emailfield } from "@/Components/auth/FormComponents/email";
 import { authClient } from "@/lib/auth-client";
-import { useNotification } from "@/Components/ui/NotificationProvider";
+import { useNotification } from "@robineb/mui-utility";
 import { Namefield } from "@/Components/auth/FormComponents/name";
 import { useRouter } from "next/navigation";
-import { fa } from "zod/locales";
-
-
-
 
 
 const { data: session } = await authClient.getSession()
