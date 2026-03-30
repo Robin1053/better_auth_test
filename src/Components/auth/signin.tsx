@@ -1,27 +1,67 @@
-"use client"
+"use client";
 
-import { authClient } from "@/lib/auth-client";
-import { Box, Card, CardContent, Typography, Alert, Button, LinearProgress, Divider, FormControlLabel, Checkbox, Badge } from "@mui/material";
 import * as React from "react";
-import { GitHubButton, GoogleButton, PasskeyButton } from "@/Components/auth/FormComponents/LoginButtons";
-import { Passwordfield } from "@/Components/auth/FormComponents/Password";
-import { Emailfield } from "@/Components/auth/FormComponents/email";
-import { useNotification } from "@/Components/ui/NotificationProvider";
+import {
+    Box,
+    Card,
+    CardContent,
+    Typography,
+    Alert,
+    Button,
+    LinearProgress,
+    Divider,
+    FormControlLabel,
+    Checkbox,
+} from "@mui/material";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import { Emailfield } from "@/Components/auth/FormComponents/email";
 import { theme } from "@/theme/mui";
-import { set } from "zod";
-
+import {
+    Passwordfield,
+    SocialSigninButton,
+    useNotification,
+} from "@robineb/mui-utility";
 
 type SigninProps = {
     onForgotPassword?: () => void;
 };
-const { data: session } = await authClient.getSession()
+
+type Provider = "passkey" | "google" | "github";
 
 function Signin({ onForgotPassword }: SigninProps) {
+    const router = useRouter();
+    const { notify } = useNotification();
 
+    const [session, setSession] = React.useState<any>(null);
+    const [email, setEmail] = React.useState("");
+    const [password, setPassword] = React.useState("");
+    const [loading, setLoading] = React.useState(false);
+    const [rememberMe, setRememberMe] = React.useState(false);
 
-    async function handleOneTap() {
-        await authClient.oneTap({
+    const [errorMessage, setErrorMessage] = React.useState("");
+    const [emailError, setEmailError] = React.useState(false);
+    const [passwordError, setPasswordError] = React.useState(false);
+
+    // last used login-method flags
+    const wasGoogle = authClient.isLastUsedLoginMethod("google");
+    const wasEmail = authClient.isLastUsedLoginMethod("email");
+    const wasPasskey = authClient.isLastUsedLoginMethod("passkey");
+    const wasGitHub = authClient.isLastUsedLoginMethod("github");
+
+    React.useEffect(() => {
+        (async () => {
+            const { data } = await authClient.getSession();
+            setSession(data ?? null);
+        })();
+    }, []);
+
+    React.useEffect(() => {
+        if (session) router.replace("/");
+    }, [session, router]);
+
+    React.useEffect(() => {
+        void authClient.oneTap({
             uxMode: "popup",
             button: {
                 container: "#google-signin-button",
@@ -31,51 +71,38 @@ function Signin({ onForgotPassword }: SigninProps) {
                     type: "standard",
                     text: "signin_with",
                     width: 400,
-                }
-            }
+                },
+            },
         });
-    }
-    console.log(process.env.GOOGLE_CLIENT_ID)
+    }, []);
 
-    handleOneTap();
-
-
-    const router = useRouter();
-
-    //session check
-    if (session) {
-        router.replace("/")
-    }
-
-    //Notification
-    const { notify } = useNotification();
-
-    // States 
-    const [email, setEmail] = React.useState("")
-    const [password, setPassword] = React.useState("")
-    const [loading, setLoading] = React.useState(false);
-    const [rememberMe, setRememberMe] = React.useState(false);
-
-
-    // Error handling states
-    const [errorMessage, setErrorMessage] = React.useState("");
-    const [EmailError, setEmailError] = React.useState(false);
-    const [PasswordError, setPasswordError] = React.useState(false)
-
-    // Determine last used login methods
-    const wasGoogle = authClient.isLastUsedLoginMethod("google")
-    const wasEmail = authClient.isLastUsedLoginMethod("email")
-    const wasPasskey = authClient.isLastUsedLoginMethod("passkey")
-    const wasGitHub = authClient.isLastUsedLoginMethod("github")
-
-
-
-    //Validierungen 
-    const isEmailValid = (email: string): boolean => {
+    const isEmailValid = (value: string): boolean => {
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return emailRegex.test(email);
+        return emailRegex.test(value);
     };
 
+    async function handleSocialLogin(provider: Provider) {
+        try {
+            setLoading(true);
+            setErrorMessage("");
+
+            if (provider === "passkey") {
+                // ggf. an deine passkey API anpassen
+                await authClient.signIn.passkey();
+            } else {
+                await authClient.signIn.social({
+                    provider,
+                    callbackURL: "/",
+                });
+            }
+        } catch (err: any) {
+            const msg = err?.message || "Social sign-in failed.";
+            setErrorMessage(msg);
+            notify({ message: msg, type: "error" });
+        } finally {
+            setLoading(false);
+        }
+    }
 
     async function handleEmailSignIn(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -84,202 +111,209 @@ function Signin({ onForgotPassword }: SigninProps) {
         setEmailError(false);
         setPasswordError(false);
 
-        // Clientseitige Prüfung
         if (!isEmailValid(email)) {
-            setEmailError(true)
-            setErrorMessage("These E-Mail is invalid")
-            setLoading(false)
+            setEmailError(true);
+            setErrorMessage("This e-mail is invalid.");
+            setLoading(false);
             return;
         }
+
         if (!email || !password) {
-            setErrorMessage("E-Mail Or Password is missing.");
+            setErrorMessage("E-mail or password is missing.");
             setEmailError(!email);
             setPasswordError(!password);
-            setLoading(false)
+            setLoading(false);
             return;
         }
-        await authClient.signIn.email({
-            email: email,
-            password: password,
-        },
+
+        await authClient.signIn.email(
+            { email, password, rememberMe },
             {
-                async onSuccess(context) {
-                    setLoading(false)
+                async onSuccess(context: any) {
+                    setLoading(false);
                     setEmailError(false);
                     setPasswordError(false);
                     setEmail("");
                     setPassword("");
-                    if (context.data.twoFactorRedirect) {
+
+                    if (context?.data?.twoFactorRedirect) {
                         notify({
-                            message: "Please complete the two-factor authentication to proceed.",
+                            message: "Please complete two-factor authentication.",
                             type: "info",
                         });
-                        router.push("/auth?view=twoFactor")
+                        router.push("/auth?view=twoFactor");
                     }
                 },
-                onError(error) {
-                    setErrorMessage(error.error.message || "An error occurred during sign-in.");
+                onError(error: any) {
                     setLoading(false);
-                    if (error.error.code === "INVALID_EMAIL_OR_PASSWORD") {
+                    const code = error?.error?.code;
+                    const msg = error?.error?.message || "Sign-in failed.";
+                    setErrorMessage(msg);
+
+                    if (code === "INVALID_EMAIL_OR_PASSWORD") {
                         setEmailError(true);
                         setPasswordError(true);
                     }
-                    if (error.error.code === "UserNotFound") {
-                        setEmailError(true);
-                        setErrorMessage(error.error.message || "No account found with this email.");
-                    }
-                    if (error.error.code === "TooManyAttempts") {
-                        setErrorMessage(error.error.message || "Too many failed attempts. Please try again later.");
-                        notify({
-                            message: error.error.message || "Too many failed attempts. Please try again later.",
-                            type: "error",
-                        });
-                    }
                 },
                 onUnexpectedError() {
-                    setErrorMessage("An unexpected error occurred. Please try again.");
                     setLoading(false);
-                }
+                    setErrorMessage("An unexpected error occurred. Please try again.");
+                },
             }
-        )
-
+        );
     }
 
+    const signinItems: Array<{ provider: Provider; used: boolean }> = [
+        { provider: "passkey", used: wasPasskey },
+        { provider: "google", used: wasGoogle },
+        { provider: "github", used: wasGitHub },
+    ];
+
     return (
-        <>
-            <Card sx={{ maxWidth: 450, margin: "0 auto", mt: 5 }}>
-                <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    <Typography variant="h3" color="primary">Sign In </Typography>
-                    {errorMessage && (
-                        <Alert
-                            variant="outlined"
-                            severity="error">
-                            {errorMessage}
-                        </Alert>
-                    )}
-                    <Box
-                        sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-                        component="form"
-                        onSubmit={handleEmailSignIn}
-                        noValidate>
+        <Card sx={{ maxWidth: 450, mx: "auto", mt: 5 }}>
+            <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <Typography variant="h3" color="primary">
+                    Sign In
+                </Typography>
 
-                        <Emailfield
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            error={EmailError}
-                            sx={{ maxWidth: 400 }}
-                            loading={loading}
-                            tabIndex={2}
-                            label="E-Mail"
-                            autoComplete="email webauthn"
-                        />
+                {errorMessage && (
+                    <Alert variant="outlined" severity="error">
+                        {errorMessage}
+                    </Alert>
+                )}
 
-                        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
-                            <Button
-                                tabIndex={-1}
-                                variant="text"
-                                onClick={onForgotPassword}
-                                sx={{ textTransform: "none" }}
-                            >
-                                Forgot Password?
-                            </Button>
-                        </Box>
+                <Box
+                    component="form"
+                    onSubmit={handleEmailSignIn}
+                    noValidate
+                    sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+                >
+                    <Emailfield
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        error={emailError}
+                        sx={{ maxWidth: 400 }}
+                        loading={loading}
+                        tabIndex={2}
+                        label="E-Mail"
+                        autoComplete="email webauthn"
+                    />
 
+                    <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+                        <Button
+                            tabIndex={-1}
+                            variant="text"
+                            onClick={onForgotPassword}
+                            sx={{ textTransform: "none" }}
+                        >
+                            Forgot Password?
+                        </Button>
+                    </Box>
 
-                        <Passwordfield
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            error={PasswordError}
-                            loading={loading}
-                            sx={
-                                { maxWidth: 400 }
-                            }
-                            label="Password"
-                            tabIndex={3}
-                            autoComplete="current-password webauthn"
+                    <Passwordfield
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        error={passwordError}
+                        loading={loading}
+                        Props={{
+                            TextfieldProps: {
+                                tabIndex: 3,
+                                autoComplete: "current-password webauthn",
+                            },
+                        }}
+                    >
+                        Password
+                    </Passwordfield>
 
-                        />
-                        <FormControlLabel control={
-                            <Checkbox value={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} tabIndex={3} />
-                        } label="Remember Me?" />
-                        <Box sx={{ position: "relative", width: "100%" }}>
-                            <Button
-                                type="submit"
-                                variant="contained"
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                tabIndex={3}
+                            />
+                        }
+                        label="Remember me?"
+                    />
+
+                    <Box sx={{ position: "relative", width: "100%" }}>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            fullWidth
+                            disabled={loading}
+                            tabIndex={4}
+                        >
+                            Sign in with e-mail and password
+                        </Button>
+
+                        {wasEmail && (
+                            <Typography
+                                variant="caption"
                                 color="primary"
-                                fullWidth
-                                disabled={loading}
-                                tabIndex={4}
+                                sx={{
+                                    position: "absolute",
+                                    top: -12,
+                                    right: 0,
+                                    backgroundColor: "background.paper",
+                                    px: 0.5,
+                                    borderRadius: 1,
+                                    fontWeight: 500,
+                                }}
                             >
-                                Sign In with Email and Passwort
-                            </Button>
-                            {wasEmail && (
+                                Last logged in
+                            </Typography>
+                        )}
+                    </Box>
+                </Box>
+
+                <Box sx={{ maxWidth: 400, position: "relative" }}>
+                    {loading ? <LinearProgress /> : <Divider>OR Sign in with</Divider>}
+                </Box>
+
+                <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    {signinItems.map((item) => (
+                        <Box key={item.provider} sx={{ position: "relative", width: 400 }}>
+                            <SocialSigninButton
+                                Provider={item.provider}
+                                variant="large"
+                                maxWidth={400}
+                                action={() => handleSocialLogin(item.provider)}
+                                Notification={{
+                                    useNotification: true,
+                                    successmessage: "Login successful",
+                                    errormessage: "Login failed",
+                                }}
+                            >
+                                {`Continue with ${item.provider}`}
+                            </SocialSigninButton>
+
+                            {item.used && (
                                 <Typography
                                     variant="caption"
                                     color="primary"
                                     sx={{
                                         position: "absolute",
                                         top: -12,
-                                        right: 0,
-                                        backgroundColor: "white",
-                                        px: 0.5,
+                                        right: 8,
+                                        backgroundColor: "background.paper",
+                                        px: 0.75,
                                         borderRadius: 1,
-                                        fontWeight: 500,
+                                        fontWeight: 600,
+                                        zIndex: 1,
                                     }}
                                 >
                                     Last logged in
                                 </Typography>
                             )}
                         </Box>
-                    </Box>
-                    <Box sx={
-                        {
-                            maxWidth: 400,
-                            position: "relative"
-                        }
-                    }>
-                        {
-                            loading && (
-                                <LinearProgress />
-                            )
+                    ))}
+                </Box>
 
-                        }
-                        {
-                            !loading && (
-                                <Divider>OR Sign in With</Divider>
-                            )
-                        }
-                    </Box>
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        {[{ button: PasskeyButton, used: wasPasskey },
-                        { button: GoogleButton, used: wasGoogle },
-                        { button: GitHubButton, used: wasGitHub }].map((item, index) => (
-                            <Box key={index} sx={{ position: "relative", width: 400 }}>
-                                <item.button width={400} />
-                                {item.used && (
-                                    <Typography
-                                        variant="caption"
-                                        color="primary"
-                                        sx={{
-                                            position: "absolute",
-                                            top: -12,
-                                            right: 0,
-                                            backgroundColor: "white",
-                                            px: 0.5,
-                                            borderRadius: 1,
-                                            fontWeight: 500,
-                                        }}
-                                    >
-                                        Last logged in
-                                    </Typography>
-                                )}
-                            </Box>
-                        ))}
-                    </Box>
-
-                </CardContent>
-            </Card >
-        </>
+                <Box id="google-signin-button" />
+            </CardContent>
+        </Card>
     );
 }
 
