@@ -41,12 +41,10 @@ function Signin({ onForgotPassword }: SigninProps) {
     const [errorMessage, setErrorMessage] = React.useState("");
     const [emailError, setEmailError] = React.useState(false);
     const [PasswordError, setPasswordError] = React.useState(false);
-
-    // last used login-method flags
-    const wasGoogle = authClient.isLastUsedLoginMethod("google");
-    const wasEmail = authClient.isLastUsedLoginMethod("email");
-    const wasPasskey = authClient.isLastUsedLoginMethod("passkey");
-    const wasGitHub = authClient.isLastUsedLoginMethod("github");
+    const [wasGoogle, setWasGoogle] = React.useState(false);
+    const [wasEmail, setWasEmail] = React.useState(false);
+    const [wasPasskey, setWasPasskey] = React.useState(false);
+    const [wasGitHub, setWasGitHub] = React.useState(false);
 
     React.useEffect(() => {
         (async () => {
@@ -56,29 +54,53 @@ function Signin({ onForgotPassword }: SigninProps) {
     }, []);
 
     React.useEffect(() => {
+        setWasGoogle(authClient.isLastUsedLoginMethod("google"));
+        setWasEmail(authClient.isLastUsedLoginMethod("email"));
+        setWasPasskey(authClient.isLastUsedLoginMethod("passkey"));
+        setWasGitHub(authClient.isLastUsedLoginMethod("github"));
+    }, []);
+
+    React.useEffect(() => {
         if (session) router.replace("/");
     }, [session, router]);
 
     async function handleSocialLogin(provider: Provider) {
-        try {
-            setLoading(true);
-            setErrorMessage("");
 
-            if (provider === "passkey") {
-                // ggf. an deine passkey API anpassen
-                await authClient.signIn.passkey();
-            } else {
-                await authClient.signIn.social({
-                    provider,
-                    callbackURL: "/",
-                });
-            }
-        } catch (err: any) {
-            const msg = err?.message || "Social sign-in failed.";
-            setErrorMessage(msg);
-            notify({ message: msg, type: "error" });
-        } finally {
-            setLoading(false);
+        if (provider === "passkey") {
+            await authClient.signIn.passkey({
+                fetchOptions: {
+                    throw: true,
+                }
+            },
+                {
+                    onError(error) {
+                        const msg = error.error.message || "Passkey sign-in failed.";
+                        const lowerMsg = msg.toLowerCase();
+                        if (lowerMsg.includes("abort signal") || lowerMsg.includes("notallowederror")) {
+                            return;
+                        }
+                        notify({
+                            message: msg,
+                            type: "error",
+                        });
+                    },
+                    async onSuccess(ctx) {
+                        if (ctx?.data?.twoFactorRedirect) {
+                            notify({
+                                message: "Please complete two-factor authentication.",
+                                type: "info",
+                            });
+                            router.push("/auth?view=twoFactor");
+                        }
+                    }
+                }
+            );
+
+        } else {
+            await authClient.signIn.social({
+                provider,
+                callbackURL: "/",
+            });
         }
     }
 
@@ -107,14 +129,14 @@ function Signin({ onForgotPassword }: SigninProps) {
         await authClient.signIn.email(
             { email, password, rememberMe },
             {
-                async onSuccess(context: any) {
+                async onSuccess(ctx) {
                     setLoading(false);
                     setEmailError(false);
                     setPasswordError(false);
                     setEmail("");
                     setPassword("");
 
-                    if (context?.data?.twoFactorRedirect) {
+                    if (ctx.data?.twoFactorRedirect) {
                         notify({
                             message: "Please complete two-factor authentication.",
                             type: "info",
@@ -122,10 +144,10 @@ function Signin({ onForgotPassword }: SigninProps) {
                         router.push("/auth?view=twoFactor");
                     }
                 },
-                onError(error: any) {
+                onError(error) {
                     setLoading(false);
-                    const code = error?.error?.code;
-                    const msg = error?.error?.message || "Sign-in failed.";
+                    const code = error.error.code;
+                    const msg = error.error.message || "Sign-in failed.";
                     setErrorMessage(msg);
 
                     if (code === "INVALID_EMAIL_OR_PASSWORD") {
@@ -258,11 +280,6 @@ function Signin({ onForgotPassword }: SigninProps) {
                                 variant="large"
                                 maxWidth={400}
                                 action={() => handleSocialLogin(item.provider)}
-                                Notification={{
-                                    useNotification: true,
-                                    successmessage: "Login successful",
-                                    errormessage: "Login failed",
-                                }}
                             >
                                 {`Continue with ${item.provider}`}
                             </SocialSigninButton>
@@ -288,8 +305,6 @@ function Signin({ onForgotPassword }: SigninProps) {
                         </Box>
                     ))}
                 </Box>
-
-                <Box id="google-signin-button" />
             </CardContent>
         </Card>
     );

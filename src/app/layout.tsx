@@ -10,6 +10,7 @@ import { Roboto } from 'next/font/google';
 import { AppBar } from "@/Components/ui/AppBar/Appbar";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v16-appRouter';
 
 
 const RobotoFont = Roboto({
@@ -24,7 +25,7 @@ export default function RootLayout({
 }>) {
 
   return (
-    <html lang="de" suppressHydrationWarning >
+    <html lang="de" >
       <head>
         <link
           rel="stylesheet"
@@ -41,14 +42,14 @@ export default function RootLayout({
               height: "100vh",
               width: "100vw",
             }
-          }
-          suppressHydrationWarning
-        >
+          }>
           <ThemeProvider theme={theme}>
             <NotificationProvider>
               <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <AppBar />
-                {children}
+                <AppRouterCacheProvider>
+                  <AppBar />
+                  {children}
+                </AppRouterCacheProvider>
               </LocalizationProvider>
             </NotificationProvider>
           </ThemeProvider>

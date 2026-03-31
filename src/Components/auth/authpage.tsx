@@ -56,12 +56,42 @@ function AuthPageComponent() {
 
 
     useEffect(() => {
-        if (!PublicKeyCredential.isConditionalMediationAvailable ||
-            !PublicKeyCredential.isConditionalMediationAvailable()) {
-            return;
-        }
+        let active = true;
 
-        void authClient.signIn.passkey({ autoFill: true })
+        const runPasskeyAutoFill = async () => {
+            if (typeof window === "undefined" || !("PublicKeyCredential" in window)) {
+                return;
+            }
+
+            const maybePublicKeyCredential = window.PublicKeyCredential as typeof PublicKeyCredential;
+            if (typeof maybePublicKeyCredential.isConditionalMediationAvailable !== "function") {
+                return;
+            }
+
+            const isAvailable = await maybePublicKeyCredential.isConditionalMediationAvailable();
+            if (!isAvailable || !active) {
+                return;
+            }
+
+            try {
+                await authClient.signIn.passkey({ autoFill: true });
+            } catch (error) {
+                const message =
+                    error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+
+                if (message.includes("abort signal") || message.includes("notallowederror")) {
+                    return;
+                }
+
+                console.error("Passkey autoFill failed", error);
+            }
+        };
+
+        void runPasskeyAutoFill();
+
+        return () => {
+            active = false;
+        };
     }, [])
     return (
         <>

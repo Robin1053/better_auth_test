@@ -17,10 +17,6 @@ import AdbIcon from '@mui/icons-material/Adb';
 import { authClient } from '@/lib/auth-client'
 import { useRouter } from "next/navigation";
 
-const { data: session } = await authClient.getSession()
-
-
-
 const pages = ['Products', 'Pricing', 'Blog'];
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
@@ -34,9 +30,24 @@ const Links_settings_no_user: Record<string, string> = {
 export function AppBar() {
 
     const router = useRouter();
+    const [session, setSession] = React.useState<any>(null);
 
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
+
+    React.useEffect(() => {
+        let active = true;
+        (async () => {
+            const { data } = await authClient.getSession();
+            if (active) {
+                setSession(data ?? null);
+            }
+        })();
+
+        return () => {
+            active = false;
+        };
+    }, []);
 
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
