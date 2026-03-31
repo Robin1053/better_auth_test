@@ -1,13 +1,14 @@
 "use client"
 import { Card, CardContent, Typography, Box, Button, LinearProgress, Divider, Alert } from "@mui/material";
 import * as React from "react"
-import { GitHubButton, GoogleButton } from "@/Components/auth/FormComponents/LoginButtons";
-import { Passwordfield } from "@/Components/auth/FormComponents/Password";
 import { Emailfield } from "@/Components/auth/FormComponents/email";
 import { authClient } from "@/lib/auth-client";
-import { useNotification } from "@robineb/mui-utility";
+import { AvatarUpload, Passwordfield, SocialSigninButton, useNotification } from "@robineb/mui-utility";
 import { Namefield } from "@/Components/auth/FormComponents/name";
 import { useRouter } from "next/navigation";
+import { isEmailValid, isPasswordValid, isNameValid, isBirthdayValid } from "@/lib/hooks/Validations";
+import { Provider } from "@/@types/auth";
+import { Dayjs } from "dayjs";
 
 
 const { data: session } = await authClient.getSession()
@@ -29,9 +30,8 @@ function Signup() {
     const [email, setEmail] = React.useState("")
     const [password, setPassword] = React.useState("")
     const [password2, setPassword2] = React.useState("")
+    const [birthday, setBirthday] = React.useState<Dayjs | null>(null)
     const [loading, setLoading] = React.useState(false);
-
-
 
 
     // Error handling states
@@ -39,25 +39,15 @@ function Signup() {
     const [EmailError, setEmailError] = React.useState(false);
     const [PasswordError, setPasswordError] = React.useState(false)
     const [NameError, setNameError] = React.useState(false)
+    const [BirthdayError, setBirthdayError] = React.useState(false)
+    const [Error, setError] = React.useState(false)
 
+    // last used login-method flags
+    const signinItems: Array<{ provider: Provider }> = [
+        { provider: "google" },
+        { provider: "github" },
+    ];
 
-    //Validierungen 
-    const isEmailValid = (email: string): boolean => {
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return emailRegex.test(email);
-    };
-
-    const isPasswordValid = (password: string, password2: string): boolean => {
-        const passwordRegex = /^(?=.*\d)(?=.*[^\w\s]).{8,}$/;
-        if (password !== password2) {
-            return false;
-        } else {
-            return passwordRegex.test(password);
-        }
-    };
-    const isNameValid = (name: string): boolean => {
-        return name.trim().length > 0;
-    }
 
     async function handleEmailSignUp(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -66,6 +56,7 @@ function Signup() {
         setEmailError(false);
         setPasswordError(false);
         setNameError(false)
+        setError(false)
 
         //client Validirungen 
         if (!isNameValid(name)) {
@@ -86,81 +77,66 @@ function Signup() {
             setPasswordError(true)
             return;
         }
-        try {
-            const { error } = await authClient.signUp.email(
-                {
-                    email,
-                    password,
-                    name,
-                }
-            );
-            if (error) {
-                setLoading(false);
 
-                switch (error.code) {
-                    case "INVALID_EMAIL":
-                        setEmailError(true);
-                        setErrorMessage("The email address is not valid.");
-                        break;
-
-                    case "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL":
-                        setEmailError(true);
-                        setErrorMessage("An account with this email already exists.");
-                        break;
-
-                    case "PASSWORD_TOO_SHORT":
-                        setPasswordError(true);
-                        setErrorMessage("The password is too short.");
-                        break;
-
-                    case "PASSWORD_TOO_WEAK":
-                        setPasswordError(true);
-                        setErrorMessage("The password is too weak.");
-                        break;
-
-                    case "INVALID_PASSWORD":
-                        setPasswordError(true);
-                        setErrorMessage("The password is invalid.");
-                        break;
-
-                    case "MISSING_FIELDS":
-                        setErrorMessage("Please fill in all required fields.");
-                        break;
-
-                    case "INVALID_NAME":
-                        setErrorMessage("The provided name is not valid.");
-                        setNameError(true)
-                        break;
-
-                    case "RATE_LIMITED":
-                        setErrorMessage("Too many signup attempts. Please try again later.");
-                        break;
-
-                    case "EMAIL_VERIFICATION_REQUIRED":
-                        setErrorMessage("Please verify your email address to continue.");
-                        notify({ message: "Please verify your email address to continue", type: "info" })
-                        break;
-
-                    case "INTERNAL_SERVER_ERROR":
-                        setErrorMessage("An internal server error occurred. Please try again later.");
-                        break;
-
-                    default:
-                        setErrorMessage("An unexpected error occurred. Please try again.");
-                        console.log(error.code)
-                        console.log(error.message)
-                        break;
-                }
-                return
+        await authClient.signUp.email(
+            { email, password, name, birthday: birthday ? birthday.toDate() : null },
+            {
+                async onSuccess(context: any) {
+                    setError(false)
+                    setLoading(false);
+                    setErrorMessage("");
+                    setEmailError(false);
+                    setPasswordError(false);
+                    setNameError(false)
+                    setEmail("");
+                    setPassword("");
+                    setName("");
+                    setPassword2("");
+                    setBirthday(null)
+                },
+                onError(ctx) {
+                    if (ctx.error.status === 403) {
+                        router.push("/auth?view=verification")
+                        notify({
+                            message: "Please verify your email address",
+                            type: "warning"
+                        })
+                    } else {
+                        setError(true)
+                        notify({
+                            type: "error",
+                            message: ctx.error.message
+                        })
+                    }
+                },
             }
-            notify({ message: "Signup successful! please check your email for verification.", type: "success" });
-        } catch (err) {
-            console.error("Unexpected error:", err);
-            setErrorMessage("An unexpected error has occurred.: " + String(err));
+        );
+    }
+
+    async function handleSocialLogin(provider: Provider) {
+        try {
+            setLoading(true);
+            setErrorMessage("");
+
+            if (provider === "passkey") {
+                // ggf. an deine passkey API anpassen
+                await authClient.signIn.passkey();
+            } else {
+                await authClient.signIn.social({
+                    provider,
+                    callbackURL: "/",
+                });
+            }
+        } catch (err: any) {
+            const msg = err?.message || "Social sign-in failed.";
+            setErrorMessage(msg);
+            notify({ message: msg, type: "error" });
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
     }
+
+
     return (
         <>
             <Card sx={
@@ -208,30 +184,44 @@ function Signup() {
                             autoComplete="webauthn"
                         />
                         <Passwordfield
+                            showstrength
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             error={PasswordError}
                             loading={loading}
-                            sx={
-                                { maxWidth: 400 }
-                            }
-                            label="Password"
-                            tabIndex={3}
-                            autoComplete="webauthn"
-
-                        />
+                            Props={{
+                                TextfieldProps: {
+                                    tabIndex: 3,
+                                    autoComplete: "current-password webauthn",
+                                    sx: {
+                                        maxWidth: 400
+                                    }
+                                },
+                            }}
+                        >
+                            Password
+                        </Passwordfield>
                         <Passwordfield
                             value={password2}
                             onChange={(e) => setPassword2(e.target.value)}
                             error={PasswordError}
                             loading={loading}
-                            sx={
-                                { maxWidth: 400 }
-                            }
-                            label="Repeat Password"
-                            tabIndex={4}
-                        />
-                        {/* TODO: Add terms and conditions checkbox, and an Image input */}
+                            Props={{
+                                TextfieldProps: {
+                                    tabIndex: 3,
+                                    autoComplete: "current-password webauthn",
+                                    sx: {
+                                        maxWidth: 400
+                                    }
+                                },
+
+                            }}
+                        >
+                            Repeat Password
+                        </Passwordfield>
+
+
+                        {/* TODO: Add terms and conditions checkbox */}
                         <Button type="submit" variant="contained" fullWidth color="primary">
                             Sign Up
                         </Button>
@@ -243,8 +233,23 @@ function Signup() {
                         <Divider>Or Sign up with</Divider>
                     )}
                     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                        <GoogleButton width={400} />
-                        <GitHubButton width={400} />
+                        {signinItems.map((item) => (
+                            <Box key={item.provider} sx={{ position: "relative", width: 400 }}>
+                                <SocialSigninButton
+                                    Provider={item.provider}
+                                    variant="large"
+                                    maxWidth={400}
+                                    action={() => handleSocialLogin(item.provider)}
+                                    Notification={{
+                                        useNotification: true,
+                                        successmessage: "Login successful",
+                                        errormessage: "Login failed",
+                                    }}
+                                >
+                                    {`Continue with ${item.provider}`}
+                                </SocialSigninButton>
+                            </Box>
+                        ))}
                     </Box>
                 </CardContent>
             </Card>

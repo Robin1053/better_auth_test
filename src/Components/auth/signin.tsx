@@ -16,18 +16,17 @@ import {
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Emailfield } from "@/Components/auth/FormComponents/email";
-import { theme } from "@/theme/mui";
 import {
     Passwordfield,
     SocialSigninButton,
     useNotification,
 } from "@robineb/mui-utility";
+import { isEmailValid } from "@/lib/hooks/Validations";
+import { Provider, SigninProps } from "@/@types/auth";
 
-type SigninProps = {
-    onForgotPassword?: () => void;
-};
 
-type Provider = "passkey" | "google" | "github";
+
+
 
 function Signin({ onForgotPassword }: SigninProps) {
     const router = useRouter();
@@ -41,7 +40,7 @@ function Signin({ onForgotPassword }: SigninProps) {
 
     const [errorMessage, setErrorMessage] = React.useState("");
     const [emailError, setEmailError] = React.useState(false);
-    const [passwordError, setPasswordError] = React.useState(false);
+    const [PasswordError, setPasswordError] = React.useState(false);
 
     // last used login-method flags
     const wasGoogle = authClient.isLastUsedLoginMethod("google");
@@ -59,27 +58,6 @@ function Signin({ onForgotPassword }: SigninProps) {
     React.useEffect(() => {
         if (session) router.replace("/");
     }, [session, router]);
-
-    React.useEffect(() => {
-        void authClient.oneTap({
-            uxMode: "popup",
-            button: {
-                container: "#google-signin-button",
-                config: {
-                    theme: theme.palette.mode === "dark" ? "filled_black" : "outline",
-                    size: "large",
-                    type: "standard",
-                    text: "signin_with",
-                    width: 400,
-                },
-            },
-        });
-    }, []);
-
-    const isEmailValid = (value: string): boolean => {
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        return emailRegex.test(value);
-    };
 
     async function handleSocialLogin(provider: Provider) {
         try {
@@ -213,7 +191,7 @@ function Signin({ onForgotPassword }: SigninProps) {
                     <Passwordfield
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        error={passwordError}
+                        error={PasswordError}
                         loading={loading}
                         Props={{
                             TextfieldProps: {

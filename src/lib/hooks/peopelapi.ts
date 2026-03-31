@@ -1,5 +1,5 @@
 import { Middleware } from "better-auth";
-import prisma from "../prisma";
+import prisma from "@/lib/prisma";
 
 async function usePeopleApi(ctx: Middleware) {
     if (ctx.path.startsWith("/callback") && ctx.context.newSession) {

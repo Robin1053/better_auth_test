@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/google-font-display */
 "use client";
 
-import { NotificationProvider } from "@/Components/ui/NotificationProvider";
+import { NotificationProvider } from "@robineb/mui-utility";
 import "./globals.css";
 import { theme } from "@/theme/mui";
 import { Box, ThemeProvider } from "@mui/material";

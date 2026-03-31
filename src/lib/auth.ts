@@ -80,6 +80,10 @@ export const auth = betterAuth({
     admin({ defaultRole: "user", allowImpersonatingAdmins: true }),
     lastLoginMethod(),
     twoFactor({
+      totpOptions: {
+        period: 30,
+        digits: 6,
+      },
       backupCodeOptions: {
         length: 6,
         amount: 10,
