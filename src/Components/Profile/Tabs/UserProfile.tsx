@@ -1,35 +1,65 @@
 import { Avatar, Badge, Box, IconButton, Typography, TextField, Divider, Button, Alert } from "@mui/material";
-import { authClient, Session } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import * as React from "react";
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { Emailfield } from "@/Components/auth/FormComponents/email";
+import { ActionButton, AvatarUpload, useNotification } from "@robineb/mui-utility";
+import { useRouter } from "next/navigation";
+import dayjs, { Dayjs } from "dayjs";
+import { DatePicker } from "@mui/x-date-pickers"
 
-type Props = {
-    session: Session | null;
-};
 
-function UserProfile({ session }: Props) {
+function UserProfile() {
+    const { data: session } = authClient.useSession()
+    if (session === null) {
+        return (null)
+    }
     //states 
-    const [image, setImage] = React.useState(session?.user.image);
-    const [Name, setName] = React.useState(session?.user.name)
-    const [Email, setEmail] = React.useState(session?.user.email)
-    const [error, setError] = React.useState<string | null>(null);
+    const [image, setImage] = React.useState(session.user.image);
+    const [Name, setName] = React.useState(session.user.name)
+    const [Email, setEmail] = React.useState(session.user.email)
+    const [Birthday, setBirthday] = React.useState<Dayjs>()
+    const [error, setError] = React.useState("");
+    const [Loadig, setLoading] = React.useState(false)
 
+    const { notify } = useNotification();
+    const router = useRouter()
 
     async function updateUser() {
-        try {
-            await authClient.updateUser({
-                name: Name,
-                image: image,
+        setLoading(true)
+        await authClient.updateUser({
+            name: Name,
+            image: image,
+            birthday: Birthday?.toDate()
+        },
+            {
+                onError: (error) => {
+                },
+                onSuccess: (data) => {
+                    setLoading(false)
+                    notify({
+                        message: "Update Successful",
+                        type: "success"
+                    })
+                }
             });
-        } catch (error) {
-            setError(error.message || "Failed to update profile");
-        }
+
         if (Email !== session?.user.email) {
             authClient.changeEmail({
-                newEmail: Email as string,
-            }).catch((error) => {
-                setError(error.message || "Failed to change email");
+                newEmail: Email,
+            }, {
+                onError(error) {
+                    if (error.error.status === 403) {
+                        notify({ type: "warning", message: "Please verify your email address" })
+                        router.push("/auth?view=verification")
+                    } else {
+                        setError(error.error.message)
+                        notify({ type: "error", message: error.error.message })
+                    }
+                },
+                onSuccess() {
+                    setLoading(false)
+                },
             })
         }
     }
@@ -69,26 +99,10 @@ function UserProfile({ session }: Props) {
                             alignItems: "center"
                         }
                     }>
-                    <IconButton component="label">
-                        <input
-                            hidden
-                            accept="image/*"
-                            type="file"
-                            onChange={handleUpload}
-                        />
-                        <Badge
-                            overlap="circular"
-                            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                            badgeContent={<PhotoCameraIcon sx={{ fontSize: 18 }} />}
-                        >
-                            <Avatar
-                                src={session.user.image || image || undefined}
-                                sx={{ width: 128, height: 128 }}
-                            />
-                        </Badge>
-                    </IconButton>
+                    <AvatarUpload onUpload={handleUpload} image={session.user.image ?? "/"} />
                     <Divider />
                     <TextField
+                        defaultValue={session.user.name}
                         id="Name"
                         label="Name"
                         value={Name}
@@ -101,6 +115,7 @@ function UserProfile({ session }: Props) {
                         }
                     />
                     <Emailfield
+                        defaultValue={session.user.email}
                         label="Email"
                         value={Email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -112,6 +127,11 @@ function UserProfile({ session }: Props) {
                             }
                         }
                     />
+                    <DatePicker
+                        defaultValue={dayjs(session.user.birthday)}
+                        value={Birthday}
+                        onChange={(e) => setBirthday(e ?? undefined)}
+                    />
                     {error && (
                         <Alert
                             variant="outlined"
@@ -119,16 +139,11 @@ function UserProfile({ session }: Props) {
                             {error}
                         </Alert>
                     )}
-                    <Button
-                        variant="contained"
-                        onClick={updateUser}
-                        sx={{
-                            mt: 2,
-                            width: 400
-                        }}
+                    <ActionButton
+                        action={updateUser}
                     >
-                        Update Profile
-                    </Button>
+                        Update User
+                    </ActionButton>
                 </Box >
             </Box >
 
