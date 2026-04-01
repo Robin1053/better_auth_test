@@ -1,6 +1,5 @@
 import { Profile } from "@/Components/Profile/Profile";
 import { auth } from "@/lib/auth";
-import { router } from "better-auth/api";
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 

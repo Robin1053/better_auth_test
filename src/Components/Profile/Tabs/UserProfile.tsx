@@ -7,6 +7,7 @@ import { ActionButton, AvatarUpload, useNotification } from "@robineb/mui-utilit
 import { useRouter } from "next/navigation";
 import dayjs, { Dayjs } from "dayjs";
 import { DatePicker } from "@mui/x-date-pickers"
+import { th } from "zod/v4/locales";
 
 
 function UserProfile() {
@@ -64,91 +65,98 @@ function UserProfile() {
         }
     }
 
-    const handleUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
+    const handleUpload = (file: File) => {
         if (file) {
-            setImage(URL.createObjectURL(file));
+            const PUT = async (file: File) => {
+                const formData = new FormData();
+                formData.append("file", file);
+
+
+            } else {
+                const error = new Error("File upload failed");
+                error.name = "UploadError";
+                throw error;
+            }
+        };
+
+        if (!session) {
+            return null
         }
-    };
-
-    if (!session) {
-        return null
-    }
-    else {
-        return (
-            <Box sx={{ width: "100%" }}>
-                <Typography
-                    variant="h2"
-                    color="tertiary"
-                    sx={
-                        {
-                            display: "flex",
-                            justifyContent: "center"
-                        }
-                    }
-                >User Profile
-                </Typography>
-                <Box
-                    component="form"
-                    sx={
-                        {
-                            mt: 2,
-                            display: "flex",
-                            justifyContent: "center",
-                            flexDirection: "column",
-                            alignItems: "center"
-                        }
-                    }>
-                    <AvatarUpload onUpload={handleUpload} image={session.user.image ?? "/"} />
-                    <Divider />
-                    <TextField
-                        defaultValue={session.user.name}
-                        id="Name"
-                        label="Name"
-                        value={Name}
-                        onChange={(e) => setName(e.target.value)}
-                        variant="standard"
+        else {
+            return (
+                <Box sx={{ width: "100%" }}>
+                    <Typography
+                        variant="h2"
+                        color="tertiary"
                         sx={
                             {
-                                width: 400
+                                display: "flex",
+                                justifyContent: "center"
                             }
                         }
-                    />
-                    <Emailfield
-                        defaultValue={session.user.email}
-                        label="Email"
-                        value={Email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        variant="standard"
-                        margin="normal"
+                    >User Profile
+                    </Typography>
+                    <Box
+                        component="form"
                         sx={
                             {
-                                width: 400
+                                mt: 2,
+                                display: "flex",
+                                justifyContent: "center",
+                                flexDirection: "column",
+                                alignItems: "center"
                             }
-                        }
-                    />
-                    <DatePicker
-                        defaultValue={dayjs(session.user.birthday)}
-                        value={Birthday}
-                        onChange={(e) => setBirthday(e ?? undefined)}
-                    />
-                    {error && (
-                        <Alert
-                            variant="outlined"
-                            severity="error">
-                            {error}
-                        </Alert>
-                    )}
-                    <ActionButton
-                        action={updateUser}
-                    >
-                        Update User
-                    </ActionButton>
+                        }>
+                        <AvatarUpload onUpload={handleUpload} image={session.user.image ?? "/"} />
+                        <Divider />
+                        <TextField
+                            defaultValue={session.user.name}
+                            id="Name"
+                            label="Name"
+                            value={Name}
+                            onChange={(e) => setName(e.target.value)}
+                            variant="standard"
+                            sx={
+                                {
+                                    width: 400
+                                }
+                            }
+                        />
+                        <Emailfield
+                            defaultValue={session.user.email}
+                            label="Email"
+                            value={Email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            variant="standard"
+                            margin="normal"
+                            sx={
+                                {
+                                    width: 400
+                                }
+                            }
+                        />
+                        <DatePicker
+                            defaultValue={dayjs(session.user.birthday)}
+                            value={Birthday}
+                            onChange={(e) => setBirthday(e ?? undefined)}
+                        />
+                        {error && (
+                            <Alert
+                                variant="outlined"
+                                severity="error">
+                                {error}
+                            </Alert>
+                        )}
+                        <ActionButton
+                            action={updateUser}
+                        >
+                            Update User
+                        </ActionButton>
+                    </Box >
                 </Box >
-            </Box >
 
-        );
+            );
+        }
     }
-}
 
-export { UserProfile };
+    export { UserProfile };

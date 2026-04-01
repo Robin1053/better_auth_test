@@ -1,18 +1,21 @@
 "use client"
 import { authClient } from "@/lib/auth-client";
+import { useEffect, useState } from "react";
 import Typography from '@mui/material/Typography'
-import {ActionButton} from "@robineb/mui-utility"
 
-const { data: session } = await authClient.getSession()
 
 export default function Home() {
-  async function handleOneTap() {
-    await authClient.oneTap({
-      uxMode: "popup",
-    });
+  const { data: session } = authClient.useSession();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (<>Loading...</>);
   }
 
-  handleOneTap();
 
   return (
     <>
